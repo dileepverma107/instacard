@@ -3,7 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { MAX_LINKS, TEMPLATES, type LinkType, type Template } from "@/lib/types";
+import { MAX_LINKS, MAX_SUB_LINKS, TEMPLATES, type LinkType, type SubLink, type Template } from "@/lib/types";
 
 const HANDLE_RE = /^[a-z0-9_.]{2,30}$/;
 
@@ -14,6 +14,7 @@ export interface SaveLinkInput {
   sub_label: string;
   icon: string;
   url: string;
+  sub_links: SubLink[];
 }
 
 export interface SaveCardInput {
@@ -45,6 +46,9 @@ export async function saveCard(input: SaveCardInput): Promise<SaveCardResult> {
   }
   if (input.links.length > MAX_LINKS) {
     return { ok: false, error: `Free plan supports up to ${MAX_LINKS} links.` };
+  }
+  if (input.links.some((l) => l.sub_links.length > MAX_SUB_LINKS)) {
+    return { ok: false, error: `Each link supports up to ${MAX_SUB_LINKS} sub-links.` };
   }
   if (!TEMPLATES.some((t) => t.id === input.template)) {
     return { ok: false, error: "Unknown template." };
@@ -85,6 +89,9 @@ export async function saveCard(input: SaveCardInput): Promise<SaveCardResult> {
       sub_label: link.sub_label.trim(),
       icon: link.icon,
       url: link.url.trim(),
+      sub_links: link.sub_links
+        .filter((s) => s.label.trim() || s.url.trim())
+        .map((s) => ({ id: s.id, label: s.label.trim(), url: s.url.trim() })),
       sort_order: i,
       is_featured: i === 0,
     }));

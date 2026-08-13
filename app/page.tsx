@@ -4,10 +4,38 @@ import { PhoneFrame } from "@/components/PhoneFrame";
 import { CreatorCard } from "@/components/CreatorCard";
 
 const SAMPLE_LINKS = [
-  { id: "1", label: "Shop my Lightroom presets", sub_label: "presets.co/maya", icon: "shopping-bag", url: "#" },
-  { id: "2", label: "Brand collabs & rate card", sub_label: "Get in touch", icon: "briefcase", url: "#" },
-  { id: "3", label: "Latest YouTube video", sub_label: "48K views this week", icon: "youtube", url: "#" },
-  { id: "4", label: "DM me on WhatsApp", sub_label: "Fastest way to reach me", icon: "message-circle", url: "#" },
+  {
+    id: "1",
+    label: "Shop my Lightroom presets",
+    sub_label: "presets.co/maya",
+    icon: "shopping-bag",
+    url: "#",
+    sub_links: [],
+  },
+  {
+    id: "2",
+    label: "Brand collabs & rate card",
+    sub_label: "Get in touch",
+    icon: "briefcase",
+    url: "#",
+    sub_links: [],
+  },
+  {
+    id: "3",
+    label: "Latest YouTube video",
+    sub_label: "48K views this week",
+    icon: "youtube",
+    url: "#",
+    sub_links: [],
+  },
+  {
+    id: "4",
+    label: "DM me on WhatsApp",
+    sub_label: "Fastest way to reach me",
+    icon: "message-circle",
+    url: "#",
+    sub_links: [],
+  },
 ];
 
 export default function LandingPage() {

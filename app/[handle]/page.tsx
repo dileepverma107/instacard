@@ -54,8 +54,8 @@ export default async function PublicCardPage({
   const { creator, links } = result;
 
   return (
-    <div className="min-h-dvh bg-neutral-950">
-      <div className="mx-auto min-h-dvh w-full max-w-md">
+    <div className="h-dvh bg-neutral-950">
+      <div className="mx-auto h-dvh w-full max-w-md">
         <CreatorCard
           name={creator.name}
           handle={creator.handle}
@@ -66,7 +66,7 @@ export default async function PublicCardPage({
           showBranding={creator.plan === "free"}
           template={creator.template}
           mode="live"
-          getHref={(linkId) => `/r/${linkId}`}
+          getHref={(linkId, subId) => (subId ? `/r/${linkId}?sub=${subId}` : `/r/${linkId}`)}
         />
       </div>
     </div>

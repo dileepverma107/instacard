@@ -35,6 +35,7 @@ create table if not exists links (
   sub_label    text not null default '',
   icon         text not null default 'link',
   url          text not null default '',
+  sub_links    jsonb not null default '[]'::jsonb,
   sort_order   int not null default 0,
   is_featured  boolean not null default false,
   created_at   timestamptz not null default now()

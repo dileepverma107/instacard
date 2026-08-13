@@ -1,17 +1,34 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
-import { ArrowDown, ArrowUp, Trash2, Plus, Copy, Check, Upload, Loader2 } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowUp,
+  Trash2,
+  Plus,
+  Copy,
+  Check,
+  Upload,
+  Loader2,
+  User,
+  Link2,
+  Palette,
+  Rocket,
+  ChevronDown,
+} from "lucide-react";
 import { PhoneFrame } from "@/components/PhoneFrame";
 import { CreatorCard } from "@/components/CreatorCard";
+import { LinkIconBadge } from "@/components/LinkIconBadge";
 import { createClient } from "@/lib/supabase/client";
 import {
   LINK_ICONS,
   MAX_LINKS,
+  MAX_SUB_LINKS,
   TEMPLATES,
   type Creator,
   type LinkBlock,
   type LinkType,
+  type SubLink,
   type Template,
 } from "@/lib/types";
 import { saveCard, type SaveLinkInput } from "@/app/dashboard/actions";
@@ -32,7 +49,12 @@ function emptyLink(): EditableLink {
     sub_label: "",
     icon: "link",
     url: "",
+    sub_links: [],
   };
+}
+
+function emptySubLink(): SubLink {
+  return { id: crypto.randomUUID(), label: "", url: "" };
 }
 
 export function DashboardEditor({
@@ -61,6 +83,7 @@ export function DashboardEditor({
       sub_label: l.sub_label,
       icon: l.icon,
       url: l.url,
+      sub_links: l.sub_links ?? [],
     })),
   );
   const [pending, startTransition] = useTransition();
@@ -77,6 +100,7 @@ export function DashboardEditor({
         sub_label: l.sub_label,
         icon: l.icon,
         url: l.url,
+        sub_links: l.sub_links,
         sort_order: i,
         is_featured: i === 0,
         created_at: "",
@@ -105,6 +129,39 @@ export function DashboardEditor({
       [next[index], next[target]] = [next[target], next[index]];
       return next;
     });
+  }
+
+  function addSubLink(linkTempId: string) {
+    setLinks((prev) =>
+      prev.map((l) =>
+        l.tempId === linkTempId && l.sub_links.length < MAX_SUB_LINKS
+          ? { ...l, sub_links: [...l.sub_links, emptySubLink()] }
+          : l,
+      ),
+    );
+  }
+
+  function updateSubLink(linkTempId: string, subId: string, patch: Partial<SubLink>) {
+    setLinks((prev) =>
+      prev.map((l) =>
+        l.tempId === linkTempId
+          ? {
+              ...l,
+              sub_links: l.sub_links.map((s) => (s.id === subId ? { ...s, ...patch } : s)),
+            }
+          : l,
+      ),
+    );
+  }
+
+  function removeSubLink(linkTempId: string, subId: string) {
+    setLinks((prev) =>
+      prev.map((l) =>
+        l.tempId === linkTempId
+          ? { ...l, sub_links: l.sub_links.filter((s) => s.id !== subId) }
+          : l,
+      ),
+    );
   }
 
   async function handleAvatarFile(e: React.ChangeEvent<HTMLInputElement>) {
@@ -155,12 +212,13 @@ export function DashboardEditor({
         avatar_url: avatarUrl,
         template,
         is_published: isPublished,
-        links: links.map(({ type, label, sub_label, icon, url }) => ({
+        links: links.map(({ type, label, sub_label, icon, url, sub_links }) => ({
           type,
           label,
           sub_label,
           icon,
           url,
+          sub_links,
         })),
       });
       if (result.ok) {
@@ -191,7 +249,12 @@ export function DashboardEditor({
       <div className="space-y-6">
         {/* profile */}
         <section className="rounded-2xl border border-neutral-200 bg-white p-6">
-          <h2 className="mb-4 text-sm font-semibold text-neutral-900">Profile</h2>
+          <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold text-neutral-900">
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-pink-50 text-pink-600">
+              <User className="h-4 w-4" />
+            </span>
+            Profile
+          </h2>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Field label="Handle">
               <div className="flex items-center rounded-xl border border-neutral-300 pl-3 focus-within:border-pink-500">
@@ -278,13 +341,16 @@ export function DashboardEditor({
         {/* links */}
         <section className="rounded-2xl border border-neutral-200 bg-white p-6">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-neutral-900">
+            <h2 className="flex items-center gap-2 text-sm font-semibold text-neutral-900">
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-pink-50 text-pink-600">
+                <Link2 className="h-4 w-4" />
+              </span>
               Links <span className="font-normal text-neutral-400">({links.length}/{MAX_LINKS})</span>
             </h2>
             <button
               onClick={addLink}
               disabled={links.length >= MAX_LINKS}
-              className="flex items-center gap-1 rounded-lg bg-neutral-900 px-3 py-1.5 text-xs font-medium text-white disabled:opacity-40"
+              className="flex items-center gap-1 rounded-lg bg-neutral-900 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-neutral-800 disabled:opacity-40"
             >
               <Plus className="h-3.5 w-3.5" /> Add link
             </button>
@@ -294,6 +360,13 @@ export function DashboardEditor({
             {links.map((link, i) => (
               <div key={link.tempId} className="rounded-xl border border-neutral-200 p-4">
                 <div className="mb-3 flex items-center gap-2">
+                  <LinkIconBadge
+                    url={link.url}
+                    icon={link.icon}
+                    fallbackWrapClass="bg-neutral-100"
+                    fallbackIconClass="text-neutral-500"
+                    className="h-8 w-8"
+                  />
                   <select
                     value={link.type}
                     onChange={(e) => updateLink(link.tempId, { type: e.target.value as LinkType })}
@@ -308,6 +381,7 @@ export function DashboardEditor({
                   <select
                     value={link.icon}
                     onChange={(e) => updateLink(link.tempId, { icon: e.target.value })}
+                    title="Fallback icon, used if a brand logo can't be found for the URL"
                     className="rounded-lg border border-neutral-300 px-2 py-1.5 text-xs capitalize outline-none"
                   >
                     {LINK_ICONS.map((icon) => (
@@ -358,9 +432,69 @@ export function DashboardEditor({
                   <input
                     value={link.url}
                     onChange={(e) => updateLink(link.tempId, { url: e.target.value })}
-                    placeholder="https://…"
+                    placeholder="https://… (its logo auto-fills the icon above)"
                     className="rounded-lg border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-pink-500 sm:col-span-2"
                   />
+                </div>
+
+                {/* sub-links */}
+                <div className="mt-3 border-t border-dashed border-neutral-200 pt-3">
+                  <div className="flex items-center justify-between">
+                    <span className="flex items-center gap-1 text-xs font-medium text-neutral-500">
+                      <ChevronDown className="h-3.5 w-3.5" />
+                      Sub-links{" "}
+                      <span className="font-normal text-neutral-400">
+                        ({link.sub_links.length}/{MAX_SUB_LINKS})
+                      </span>
+                    </span>
+                    <button
+                      onClick={() => addSubLink(link.tempId)}
+                      disabled={link.sub_links.length >= MAX_SUB_LINKS}
+                      className="flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-pink-600 hover:bg-pink-50 disabled:opacity-40"
+                    >
+                      <Plus className="h-3 w-3" /> Add sub-link
+                    </button>
+                  </div>
+                  {link.sub_links.length > 0 && (
+                    <p className="mt-1 text-xs text-neutral-400">
+                      Visitors tap this link to expand a mini-menu instead of navigating straight
+                      away — great for grouping a few destinations under one block.
+                    </p>
+                  )}
+                  <div className="mt-2 space-y-2">
+                    {link.sub_links.map((sub) => (
+                      <div key={sub.id} className="flex items-center gap-2 pl-4">
+                        <LinkIconBadge
+                          url={sub.url}
+                          icon="link"
+                          fallbackWrapClass="bg-neutral-100"
+                          fallbackIconClass="text-neutral-500"
+                          className="h-7 w-7"
+                        />
+                        <input
+                          value={sub.label}
+                          onChange={(e) =>
+                            updateSubLink(link.tempId, sub.id, { label: e.target.value })
+                          }
+                          placeholder="Label"
+                          className="w-28 rounded-lg border border-neutral-300 px-2.5 py-1.5 text-xs outline-none focus:border-pink-500 sm:w-32"
+                        />
+                        <input
+                          value={sub.url}
+                          onChange={(e) => updateSubLink(link.tempId, sub.id, { url: e.target.value })}
+                          placeholder="https://…"
+                          className="min-w-0 flex-1 rounded-lg border border-neutral-300 px-2.5 py-1.5 text-xs outline-none focus:border-pink-500"
+                        />
+                        <button
+                          onClick={() => removeSubLink(link.tempId, sub.id)}
+                          className="rounded-md p-1 text-red-400 hover:bg-red-50"
+                          aria-label="Remove sub-link"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             ))}
@@ -372,7 +506,12 @@ export function DashboardEditor({
 
         {/* template */}
         <section className="rounded-2xl border border-neutral-200 bg-white p-6">
-          <h2 className="mb-1 text-sm font-semibold text-neutral-900">Template</h2>
+          <h2 className="mb-1 flex items-center gap-2 text-sm font-semibold text-neutral-900">
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-pink-50 text-pink-600">
+              <Palette className="h-4 w-4" />
+            </span>
+            Template
+          </h2>
           <p className="mb-4 text-xs text-neutral-500">
             Free for everyone while we&apos;re in beta — some of these move to Premium later.
           </p>
@@ -409,7 +548,12 @@ export function DashboardEditor({
         <section className="rounded-2xl border border-neutral-200 bg-white p-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-sm font-semibold text-neutral-900">Publish</h2>
+              <h2 className="flex items-center gap-2 text-sm font-semibold text-neutral-900">
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-pink-50 text-pink-600">
+                  <Rocket className="h-4 w-4" />
+                </span>
+                Publish
+              </h2>
               <p className="mt-1 flex items-center gap-2 text-xs text-neutral-500">
                 {isPublished ? "Your card is live at " : "Your card is unpublished."}
                 {isPublished && (

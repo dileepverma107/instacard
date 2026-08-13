@@ -47,6 +47,12 @@ export interface Creator {
   updated_at: string;
 }
 
+export interface SubLink {
+  id: string;
+  label: string;
+  url: string;
+}
+
 export interface LinkBlock {
   id: string;
   creator_id: string;
@@ -55,6 +61,7 @@ export interface LinkBlock {
   sub_label: string;
   icon: string;
   url: string;
+  sub_links: SubLink[];
   sort_order: number;
   is_featured: boolean;
   created_at: string;
@@ -70,6 +77,7 @@ export interface ClickEvent {
 }
 
 export const MAX_LINKS = 6;
+export const MAX_SUB_LINKS = 4;
 
 export const LINK_ICONS = [
   "link",
