@@ -64,6 +64,7 @@ export default async function PublicCardPage({
           bioLine={creator.bio_line}
           links={links}
           showBranding={creator.plan === "free"}
+          template={creator.template}
           mode="live"
           getHref={(linkId) => `/r/${linkId}`}
         />

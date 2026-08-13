@@ -15,6 +15,7 @@ create table if not exists creators (
   follower_count  bigint not null default 0,
   bio_line        text not null default '',
   plan            text not null default 'free' check (plan in ('free', 'premium')),
+  template        text not null default 'aurora' check (template in ('aurora', 'paper', 'neon')),
   is_published    boolean not null default false,
   created_at      timestamptz not null default now(),
   updated_at      timestamptz not null default now()
@@ -142,4 +143,35 @@ create policy "subscriptions_owner_all" on subscriptions
     exists (select 1 from creators c where c.id = subscriptions.creator_id and c.user_id = auth.uid())
   ) with check (
     exists (select 1 from creators c where c.id = subscriptions.creator_id and c.user_id = auth.uid())
+  );
+
+-- ---------------------------------------------------------------------------
+-- avatars storage bucket (profile picture uploads)
+-- ---------------------------------------------------------------------------
+insert into storage.buckets (id, name, public)
+values ('avatars', 'avatars', true)
+on conflict (id) do nothing;
+
+-- files are stored as "<user_id>/avatar-<timestamp>.<ext>" — the folder name
+-- (first path segment) doubles as the ownership check.
+drop policy if exists "avatars_public_read" on storage.objects;
+create policy "avatars_public_read" on storage.objects
+  for select using (bucket_id = 'avatars');
+
+drop policy if exists "avatars_owner_insert" on storage.objects;
+create policy "avatars_owner_insert" on storage.objects
+  for insert with check (
+    bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+drop policy if exists "avatars_owner_update" on storage.objects;
+create policy "avatars_owner_update" on storage.objects
+  for update using (
+    bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+drop policy if exists "avatars_owner_delete" on storage.objects;
+create policy "avatars_owner_delete" on storage.objects
+  for delete using (
+    bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text
   );

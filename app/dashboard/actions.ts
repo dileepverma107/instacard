@@ -3,7 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { MAX_LINKS, type LinkType } from "@/lib/types";
+import { MAX_LINKS, TEMPLATES, type LinkType, type Template } from "@/lib/types";
 
 const HANDLE_RE = /^[a-z0-9_.]{2,30}$/;
 
@@ -22,6 +22,7 @@ export interface SaveCardInput {
   bio_line: string;
   follower_count: number;
   avatar_url: string;
+  template: Template;
   is_published: boolean;
   links: SaveLinkInput[];
 }
@@ -45,6 +46,9 @@ export async function saveCard(input: SaveCardInput): Promise<SaveCardResult> {
   if (input.links.length > MAX_LINKS) {
     return { ok: false, error: `Free plan supports up to ${MAX_LINKS} links.` };
   }
+  if (!TEMPLATES.some((t) => t.id === input.template)) {
+    return { ok: false, error: "Unknown template." };
+  }
 
   const { data: creator, error: creatorError } = await supabase
     .from("creators")
@@ -54,6 +58,7 @@ export async function saveCard(input: SaveCardInput): Promise<SaveCardResult> {
       bio_line: input.bio_line.trim(),
       follower_count: Math.max(0, Math.floor(input.follower_count) || 0),
       avatar_url: input.avatar_url.trim() || null,
+      template: input.template,
       is_published: input.is_published,
     })
     .eq("user_id", user.id)

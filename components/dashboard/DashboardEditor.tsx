@@ -1,11 +1,22 @@
 "use client";
 
-import { useEffect, useMemo, useState, useTransition } from "react";
-import { ArrowDown, ArrowUp, Trash2, Plus, Copy, Check } from "lucide-react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { ArrowDown, ArrowUp, Trash2, Plus, Copy, Check, Upload, Loader2 } from "lucide-react";
 import { PhoneFrame } from "@/components/PhoneFrame";
 import { CreatorCard } from "@/components/CreatorCard";
-import { LINK_ICONS, MAX_LINKS, type Creator, type LinkBlock, type LinkType } from "@/lib/types";
+import { createClient } from "@/lib/supabase/client";
+import {
+  LINK_ICONS,
+  MAX_LINKS,
+  TEMPLATES,
+  type Creator,
+  type LinkBlock,
+  type LinkType,
+  type Template,
+} from "@/lib/types";
 import { saveCard, type SaveLinkInput } from "@/app/dashboard/actions";
+
+const MAX_AVATAR_BYTES = 5 * 1024 * 1024;
 
 const LINK_TYPES: LinkType[] = ["portfolio", "brand", "product", "social", "contact", "custom"];
 
@@ -36,7 +47,11 @@ export function DashboardEditor({
   const [bioLine, setBioLine] = useState(creator.bio_line);
   const [followerCount, setFollowerCount] = useState(creator.follower_count);
   const [avatarUrl, setAvatarUrl] = useState(creator.avatar_url ?? "");
+  const [template, setTemplate] = useState<Template>(creator.template ?? "aurora");
   const [isPublished, setIsPublished] = useState(creator.is_published);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [links, setLinks] = useState<EditableLink[]>(
     initialLinks.map((l) => ({
       tempId: l.id,
@@ -92,6 +107,43 @@ export function DashboardEditor({
     });
   }
 
+  async function handleAvatarFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setUploadError("Please choose an image file.");
+      return;
+    }
+    if (file.size > MAX_AVATAR_BYTES) {
+      setUploadError("Image must be under 5MB.");
+      return;
+    }
+
+    setUploadError(null);
+    setUploading(true);
+    try {
+      const supabase = createClient();
+      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+      const path = `${creator.user_id}/avatar-${Date.now()}.${ext}`;
+      const { error } = await supabase.storage
+        .from("avatars")
+        .upload(path, file, { cacheControl: "3600", upsert: true });
+      if (error) throw error;
+      const { data } = supabase.storage.from("avatars").getPublicUrl(path);
+      setAvatarUrl(data.publicUrl);
+    } catch (err) {
+      setUploadError(
+        err instanceof Error
+          ? err.message
+          : "Upload failed. Make sure the 'avatars' storage bucket exists.",
+      );
+    } finally {
+      setUploading(false);
+    }
+  }
+
   function handleSave() {
     setFeedback(null);
     startTransition(async () => {
@@ -101,6 +153,7 @@ export function DashboardEditor({
         bio_line: bioLine,
         follower_count: followerCount,
         avatar_url: avatarUrl,
+        template,
         is_published: isPublished,
         links: links.map(({ type, label, sub_label, icon, url }) => ({
           type,
@@ -119,7 +172,12 @@ export function DashboardEditor({
   }
 
   const [origin, setOrigin] = useState("");
-  useEffect(() => setOrigin(window.location.origin), []);
+  useEffect(() => {
+    // window is only available after mount; this is a one-off read of the
+    // current deployment's origin, not a subscription to external state.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setOrigin(window.location.origin);
+  }, []);
   const publicPath = `${origin}/${handle}`;
 
   function copyLink() {
@@ -163,13 +221,46 @@ export function DashboardEditor({
                 className="w-full rounded-xl border border-neutral-300 px-3 py-2.5 text-sm outline-none focus:border-pink-500"
               />
             </Field>
-            <Field label="Avatar URL">
-              <input
-                value={avatarUrl}
-                onChange={(e) => setAvatarUrl(e.target.value)}
-                className="w-full rounded-xl border border-neutral-300 px-3 py-2.5 text-sm outline-none focus:border-pink-500"
-                placeholder="https://…"
-              />
+            <Field label="Profile photo" className="sm:col-span-2">
+              <div className="flex items-center gap-4">
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-neutral-100 text-lg font-semibold text-neutral-400">
+                  {avatarUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    (name || handle || "?").charAt(0).toUpperCase()
+                  )}
+                </div>
+                <div className="flex-1">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAvatarFile}
+                    className="hidden"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                    className="flex items-center gap-1.5 rounded-lg border border-neutral-300 px-3 py-1.5 text-xs font-medium text-neutral-700 hover:bg-neutral-50 disabled:opacity-60"
+                  >
+                    {uploading ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <Upload className="h-3.5 w-3.5" />
+                    )}
+                    {uploading ? "Uploading…" : "Upload photo"}
+                  </button>
+                  <input
+                    value={avatarUrl}
+                    onChange={(e) => setAvatarUrl(e.target.value)}
+                    className="mt-2 w-full rounded-lg border border-neutral-200 px-2.5 py-1.5 text-xs text-neutral-500 outline-none focus:border-pink-500"
+                    placeholder="…or paste an image URL"
+                  />
+                  {uploadError && <p className="mt-1 text-xs text-red-500">{uploadError}</p>}
+                </div>
+              </div>
             </Field>
             <Field label="Bio line" className="sm:col-span-2">
               <textarea
@@ -279,6 +370,41 @@ export function DashboardEditor({
           </div>
         </section>
 
+        {/* template */}
+        <section className="rounded-2xl border border-neutral-200 bg-white p-6">
+          <h2 className="mb-1 text-sm font-semibold text-neutral-900">Template</h2>
+          <p className="mb-4 text-xs text-neutral-500">
+            Free for everyone while we&apos;re in beta — some of these move to Premium later.
+          </p>
+          <div className="grid grid-cols-3 gap-3">
+            {TEMPLATES.map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => setTemplate(t.id)}
+                className={`rounded-xl border p-2 text-left transition ${
+                  template === t.id
+                    ? "border-pink-500 ring-2 ring-pink-500/20"
+                    : "border-neutral-200 hover:border-neutral-300"
+                }`}
+              >
+                <div
+                  className="mb-2 flex h-14 w-full overflow-hidden rounded-lg"
+                  style={{ backgroundColor: t.swatch[0] }}
+                >
+                  {t.swatch.slice(1).map((c, i) => (
+                    <span key={i} className="h-full flex-1" style={{ backgroundColor: c }} />
+                  ))}
+                </div>
+                <div className="flex items-center gap-1.5 text-xs font-medium text-neutral-900">
+                  {t.name}
+                  {template === t.id && <Check className="h-3 w-3 text-pink-500" />}
+                </div>
+              </button>
+            ))}
+          </div>
+        </section>
+
         {/* publish */}
         <section className="rounded-2xl border border-neutral-200 bg-white p-6">
           <div className="flex items-center justify-between">
@@ -353,6 +479,7 @@ export function DashboardEditor({
             bioLine={bioLine}
             links={previewLinks}
             showBranding={creator.plan === "free"}
+            template={template}
             mode="preview"
           />
         </PhoneFrame>
