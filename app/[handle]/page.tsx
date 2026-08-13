@@ -66,7 +66,7 @@ export default async function PublicCardPage({
           showBranding={creator.plan === "free"}
           template={creator.template}
           mode="live"
-          getHref={(linkId, subId) => (subId ? `/r/${linkId}?sub=${subId}` : `/r/${linkId}`)}
+          linkHrefBase="/r"
         />
       </div>
     </div>

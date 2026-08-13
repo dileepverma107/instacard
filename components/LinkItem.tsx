@@ -10,15 +10,27 @@ export interface LinkItemProps {
   link: Pick<LinkBlock, "id" | "label" | "sub_label" | "icon" | "url" | "sub_links">;
   theme: TemplateTheme;
   mode: "live" | "preview";
-  getHref?: (linkId: string, subId?: string) => string;
+  /** Base path for the click-tracking redirect route (e.g. "/r"). When set,
+   *  hrefs go through `${linkHrefBase}/${link.id}` instead of the raw URL. */
+  linkHrefBase?: string;
   animClassName?: string;
   animStyle?: React.CSSProperties;
 }
 
-export function LinkItem({ link, theme: t, mode, getHref, animClassName, animStyle }: LinkItemProps) {
+export function LinkItem({
+  link,
+  theme: t,
+  mode,
+  linkHrefBase,
+  animClassName,
+  animStyle,
+}: LinkItemProps) {
   const [expanded, setExpanded] = useState(false);
   const subLinks = link.sub_links ?? [];
   const hasSubLinks = subLinks.length > 0;
+  const mainHref = linkHrefBase ? `${linkHrefBase}/${link.id}` : link.url;
+  const subHref = (subId: string) =>
+    linkHrefBase ? `${linkHrefBase}/${link.id}?sub=${subId}` : subLinks.find((s) => s.id === subId)?.url;
 
   const rowClassName = `flex w-full items-center gap-3 rounded-2xl border px-4 py-3 transition ${t.linkBlock}`;
 
@@ -56,7 +68,7 @@ export function LinkItem({ link, theme: t, mode, getHref, animClassName, animSty
         </button>
       ) : mode === "live" ? (
         <a
-          href={getHref ? getHref(link.id) : link.url}
+          href={mainHref}
           target="_blank"
           rel="noopener noreferrer"
           className={rowClassName}
@@ -87,7 +99,7 @@ export function LinkItem({ link, theme: t, mode, getHref, animClassName, animSty
             return mode === "live" ? (
               <a
                 key={sub.id}
-                href={getHref ? getHref(link.id, sub.id) : sub.url}
+                href={subHref(sub.id) ?? sub.url}
                 target="_blank"
                 rel="noopener noreferrer"
                 className={subClassName}

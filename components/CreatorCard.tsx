@@ -16,7 +16,7 @@ export interface CreatorCardProps {
   /** "live" renders real navigable anchors and plays the entrance animation (public page).
    *  "preview" renders inert, static blocks (dashboard live preview). */
   mode: "live" | "preview";
-  getHref?: (linkId: string, subId?: string) => string;
+  linkHrefBase?: string;
 }
 
 export function CreatorCard({
@@ -29,7 +29,7 @@ export function CreatorCard({
   showBranding,
   template = "aurora",
   mode,
-  getHref,
+  linkHrefBase,
 }: CreatorCardProps) {
   const t = THEME[template];
   const animated = mode === "live";
@@ -110,7 +110,7 @@ export function CreatorCard({
                 link={link}
                 theme={t}
                 mode={mode}
-                getHref={getHref}
+                linkHrefBase={linkHrefBase}
                 animClassName={animClassName}
                 animStyle={animStyle}
               />
