@@ -137,10 +137,10 @@ export function CreatorCard({
   const t = THEME[template];
   const animated = mode === "live";
 
-  function enter(delayMs: number) {
+  function enter(delayMs: number): { className: string; style?: React.CSSProperties } {
     return animated
       ? { className: "animate-card-in", style: { animationDelay: `${delayMs}ms` } }
-      : {};
+      : { className: "" };
   }
 
   return (
@@ -154,7 +154,10 @@ export function CreatorCard({
 
       <div className="flex-1 overflow-y-auto px-5 pb-6 pt-6">
         {/* avatar with story-style gradient ring */}
-        <div className="flex flex-col items-center text-center" {...enter(0)}>
+        <div
+          className={`flex flex-col items-center text-center ${enter(0).className}`}
+          style={enter(0).style}
+        >
           <div className={`rounded-full p-[3px] ${t.ring}`}>
             <div className={`rounded-full p-[2px] ${t.avatarInset}`}>
               {avatarUrl ? (
