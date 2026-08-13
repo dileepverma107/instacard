@@ -57,6 +57,16 @@ function emptySubLink(): SubLink {
   return { id: crypto.randomUUID(), label: "", url: "" };
 }
 
+const cardClass = "rounded-3xl border border-white/60 bg-white/70 p-6 shadow-sm backdrop-blur-xl";
+const sectionIconClass =
+  "flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-tr from-amber-400/20 via-pink-500/20 to-purple-600/20 text-pink-600";
+const inputClass =
+  "w-full rounded-2xl border border-neutral-200 bg-white/80 px-3.5 py-2.5 text-sm text-neutral-900 placeholder-neutral-400 shadow-sm outline-none transition focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-500/10";
+const compactInputClass =
+  "rounded-xl border border-neutral-200 bg-white/80 px-2.5 py-1.5 text-xs text-neutral-900 placeholder-neutral-400 shadow-sm outline-none transition focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-500/10";
+const selectClass =
+  "rounded-xl border border-neutral-200 bg-white/80 px-2.5 py-1.5 text-xs capitalize text-neutral-700 shadow-sm outline-none transition focus:border-pink-400 focus:ring-4 focus:ring-pink-500/10";
+
 export function DashboardEditor({
   creator,
   initialLinks,
@@ -248,21 +258,21 @@ export function DashboardEditor({
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_320px]">
       <div className="space-y-6">
         {/* profile */}
-        <section className="rounded-2xl border border-neutral-200 bg-white p-6">
+        <section className={cardClass}>
           <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold text-neutral-900">
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-pink-50 text-pink-600">
+            <span className={sectionIconClass}>
               <User className="h-4 w-4" />
             </span>
             Profile
           </h2>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Field label="Handle">
-              <div className="flex items-center rounded-xl border border-neutral-300 pl-3 focus-within:border-pink-500">
-                <span className="text-sm text-neutral-400">@</span>
+              <div className="flex items-center gap-1.5 rounded-2xl border border-neutral-200 bg-white/80 px-3.5 py-2.5 text-sm shadow-sm transition focus-within:border-pink-400 focus-within:bg-white focus-within:ring-4 focus-within:ring-pink-500/10">
+                <span className="text-neutral-400">@</span>
                 <input
                   value={handle}
                   onChange={(e) => setHandle(e.target.value.toLowerCase())}
-                  className="w-full rounded-xl px-2 py-2.5 text-sm outline-none"
+                  className="w-full bg-transparent outline-none"
                   placeholder="yourname"
                 />
               </div>
@@ -271,7 +281,7 @@ export function DashboardEditor({
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full rounded-xl border border-neutral-300 px-3 py-2.5 text-sm outline-none focus:border-pink-500"
+                className={inputClass}
                 placeholder="Jordan Rivera"
               />
             </Field>
@@ -281,18 +291,20 @@ export function DashboardEditor({
                 min={0}
                 value={followerCount}
                 onChange={(e) => setFollowerCount(Number(e.target.value))}
-                className="w-full rounded-xl border border-neutral-300 px-3 py-2.5 text-sm outline-none focus:border-pink-500"
+                className={inputClass}
               />
             </Field>
             <Field label="Profile photo" className="sm:col-span-2">
               <div className="flex items-center gap-4">
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-neutral-100 text-lg font-semibold text-neutral-400">
-                  {avatarUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
-                  ) : (
-                    (name || handle || "?").charAt(0).toUpperCase()
-                  )}
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-tr from-amber-400 via-pink-500 to-purple-600 p-[2px]">
+                  <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full bg-white text-lg font-semibold text-neutral-400">
+                    {avatarUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
+                    ) : (
+                      (name || handle || "?").charAt(0).toUpperCase()
+                    )}
+                  </div>
                 </div>
                 <div className="flex-1">
                   <input
@@ -306,7 +318,7 @@ export function DashboardEditor({
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={uploading}
-                    className="flex items-center gap-1.5 rounded-lg border border-neutral-300 px-3 py-1.5 text-xs font-medium text-neutral-700 hover:bg-neutral-50 disabled:opacity-60"
+                    className="flex items-center gap-1.5 rounded-lg border border-neutral-300 bg-white/80 px-3 py-1.5 text-xs font-medium text-neutral-700 shadow-sm transition hover:bg-white disabled:opacity-60"
                   >
                     {uploading ? (
                       <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -318,7 +330,7 @@ export function DashboardEditor({
                   <input
                     value={avatarUrl}
                     onChange={(e) => setAvatarUrl(e.target.value)}
-                    className="mt-2 w-full rounded-lg border border-neutral-200 px-2.5 py-1.5 text-xs text-neutral-500 outline-none focus:border-pink-500"
+                    className={`${compactInputClass} mt-2 w-full`}
                     placeholder="…or paste an image URL"
                   />
                   {uploadError && <p className="mt-1 text-xs text-red-500">{uploadError}</p>}
@@ -331,7 +343,7 @@ export function DashboardEditor({
                 onChange={(e) => setBioLine(e.target.value)}
                 rows={2}
                 maxLength={140}
-                className="w-full resize-none rounded-xl border border-neutral-300 px-3 py-2.5 text-sm outline-none focus:border-pink-500"
+                className={`${inputClass} resize-none`}
                 placeholder="Fitness coach helping busy parents get strong in 20 min/day."
               />
             </Field>
@@ -339,10 +351,10 @@ export function DashboardEditor({
         </section>
 
         {/* links */}
-        <section className="rounded-2xl border border-neutral-200 bg-white p-6">
+        <section className={cardClass}>
           <div className="mb-4 flex items-center justify-between">
             <h2 className="flex items-center gap-2 text-sm font-semibold text-neutral-900">
-              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-pink-50 text-pink-600">
+              <span className={sectionIconClass}>
                 <Link2 className="h-4 w-4" />
               </span>
               Links <span className="font-normal text-neutral-400">({links.length}/{MAX_LINKS})</span>
@@ -358,7 +370,10 @@ export function DashboardEditor({
 
           <div className="space-y-3">
             {links.map((link, i) => (
-              <div key={link.tempId} className="rounded-xl border border-neutral-200 p-4">
+              <div
+                key={link.tempId}
+                className="rounded-2xl border border-neutral-200 bg-white/60 p-4 shadow-sm"
+              >
                 <div className="mb-3 flex items-center gap-2">
                   <LinkIconBadge
                     url={link.url}
@@ -370,7 +385,7 @@ export function DashboardEditor({
                   <select
                     value={link.type}
                     onChange={(e) => updateLink(link.tempId, { type: e.target.value as LinkType })}
-                    className="rounded-lg border border-neutral-300 px-2 py-1.5 text-xs capitalize outline-none"
+                    className={selectClass}
                   >
                     {LINK_TYPES.map((t) => (
                       <option key={t} value={t}>
@@ -382,7 +397,7 @@ export function DashboardEditor({
                     value={link.icon}
                     onChange={(e) => updateLink(link.tempId, { icon: e.target.value })}
                     title="Fallback icon, used if a brand logo can't be found for the URL"
-                    className="rounded-lg border border-neutral-300 px-2 py-1.5 text-xs capitalize outline-none"
+                    className={selectClass}
                   >
                     {LINK_ICONS.map((icon) => (
                       <option key={icon} value={icon}>
@@ -421,19 +436,19 @@ export function DashboardEditor({
                     value={link.label}
                     onChange={(e) => updateLink(link.tempId, { label: e.target.value })}
                     placeholder="Label (e.g. Shop my presets)"
-                    className="rounded-lg border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-pink-500"
+                    className={compactInputClass}
                   />
                   <input
                     value={link.sub_label}
                     onChange={(e) => updateLink(link.tempId, { sub_label: e.target.value })}
                     placeholder="Sub-label (optional)"
-                    className="rounded-lg border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-pink-500"
+                    className={compactInputClass}
                   />
                   <input
                     value={link.url}
                     onChange={(e) => updateLink(link.tempId, { url: e.target.value })}
                     placeholder="https://… (its logo auto-fills the icon above)"
-                    className="rounded-lg border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-pink-500 sm:col-span-2"
+                    className={`${compactInputClass} sm:col-span-2`}
                   />
                 </div>
 
@@ -477,13 +492,13 @@ export function DashboardEditor({
                             updateSubLink(link.tempId, sub.id, { label: e.target.value })
                           }
                           placeholder="Label"
-                          className="w-28 rounded-lg border border-neutral-300 px-2.5 py-1.5 text-xs outline-none focus:border-pink-500 sm:w-32"
+                          className={`w-28 sm:w-32 ${compactInputClass}`}
                         />
                         <input
                           value={sub.url}
                           onChange={(e) => updateSubLink(link.tempId, sub.id, { url: e.target.value })}
                           placeholder="https://…"
-                          className="min-w-0 flex-1 rounded-lg border border-neutral-300 px-2.5 py-1.5 text-xs outline-none focus:border-pink-500"
+                          className={`min-w-0 flex-1 ${compactInputClass}`}
                         />
                         <button
                           onClick={() => removeSubLink(link.tempId, sub.id)}
@@ -505,9 +520,9 @@ export function DashboardEditor({
         </section>
 
         {/* template */}
-        <section className="rounded-2xl border border-neutral-200 bg-white p-6">
+        <section className={cardClass}>
           <h2 className="mb-1 flex items-center gap-2 text-sm font-semibold text-neutral-900">
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-pink-50 text-pink-600">
+            <span className={sectionIconClass}>
               <Palette className="h-4 w-4" />
             </span>
             Template
@@ -521,7 +536,7 @@ export function DashboardEditor({
                 key={t.id}
                 type="button"
                 onClick={() => setTemplate(t.id)}
-                className={`rounded-xl border p-2 text-left transition ${
+                className={`rounded-xl border bg-white/60 p-2 text-left shadow-sm transition ${
                   template === t.id
                     ? "border-pink-500 ring-2 ring-pink-500/20"
                     : "border-neutral-200 hover:border-neutral-300"
@@ -545,11 +560,11 @@ export function DashboardEditor({
         </section>
 
         {/* publish */}
-        <section className="rounded-2xl border border-neutral-200 bg-white p-6">
+        <section className={cardClass}>
           <div className="flex items-center justify-between">
             <div>
               <h2 className="flex items-center gap-2 text-sm font-semibold text-neutral-900">
-                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-pink-50 text-pink-600">
+                <span className={sectionIconClass}>
                   <Rocket className="h-4 w-4" />
                 </span>
                 Publish
@@ -597,7 +612,7 @@ export function DashboardEditor({
           <button
             onClick={handleSave}
             disabled={pending}
-            className="rounded-xl bg-gradient-to-tr from-amber-400 via-pink-500 to-purple-600 px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
+            className="rounded-xl bg-gradient-to-tr from-amber-400 via-pink-500 to-purple-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-pink-500/20 transition hover:shadow-pink-500/30 disabled:opacity-60"
           >
             {pending ? "Saving…" : "Save changes"}
           </button>

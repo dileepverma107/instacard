@@ -20,17 +20,17 @@ export function AnalyticsPanel({
   return (
     <div className="max-w-3xl">
       <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-3">
-        <div className="rounded-2xl border border-neutral-200 bg-white p-5">
+        <div className="rounded-2xl border border-white/60 bg-white/70 p-5 shadow-sm backdrop-blur-xl">
           <div className="text-2xl font-semibold text-neutral-900">{totalClicks}</div>
           <div className="text-sm text-neutral-500">Total clicks</div>
         </div>
-        <div className="rounded-2xl border border-neutral-200 bg-white p-5">
+        <div className="rounded-2xl border border-white/60 bg-white/70 p-5 shadow-sm backdrop-blur-xl">
           <div className="text-2xl font-semibold text-neutral-900">{links.length}</div>
           <div className="text-sm text-neutral-500">Active links</div>
         </div>
       </div>
 
-      <div className="rounded-2xl border border-neutral-200 bg-white p-5">
+      <div className="rounded-2xl border border-white/60 bg-white/70 p-5 shadow-sm backdrop-blur-xl">
         <h2 className="mb-4 text-sm font-semibold text-neutral-900">Clicks per link</h2>
         {links.length === 0 ? (
           <p className="text-sm text-neutral-400">Add links to start tracking clicks.</p>

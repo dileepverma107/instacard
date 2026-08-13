@@ -20,13 +20,15 @@ export function DashboardTabs({
 
   return (
     <div>
-      <div className="mb-6 flex gap-1 rounded-xl bg-neutral-200/60 p-1 w-fit">
+      <div className="mb-6 flex w-fit gap-1 rounded-xl border border-white/60 bg-white/50 p-1 shadow-sm backdrop-blur-xl">
         {(["card", "analytics"] as const).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
             className={`rounded-lg px-4 py-1.5 text-sm font-medium capitalize transition ${
-              tab === t ? "bg-white text-neutral-900 shadow-sm" : "text-neutral-500"
+              tab === t
+                ? "bg-white text-neutral-900 shadow-sm"
+                : "text-neutral-500 hover:text-neutral-700"
             }`}
           >
             {t === "card" ? "Your card" : "Analytics"}
