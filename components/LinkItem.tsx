@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronRight, ChevronDown } from "lucide-react";
+import { ChevronRight, ChevronDown, ArrowUpRight } from "lucide-react";
 import { LinkIconBadge } from "./LinkIconBadge";
 import type { LinkBlock } from "@/lib/types";
 import type { TemplateTheme } from "@/lib/templateTheme";
@@ -52,7 +52,7 @@ export function LinkItem({
       </span>
       {hasSubLinks ? (
         <ChevronDown
-          className={`h-4 w-4 shrink-0 transition-transform ${t.chevron} ${expanded ? "rotate-180" : ""}`}
+          className={`h-4 w-4 shrink-0 transition-transform duration-300 ${t.chevron} ${expanded ? "rotate-180" : ""}`}
         />
       ) : (
         <ChevronRight className={`h-4 w-4 shrink-0 ${t.chevron}`} />
@@ -79,39 +79,55 @@ export function LinkItem({
         <div className={rowClassName}>{rowContent}</div>
       )}
 
-      {hasSubLinks && expanded && (
-        <div className="mt-1.5 space-y-1.5 pl-4">
-          {subLinks.map((sub) => {
-            const subContent = (
-              <>
-                <LinkIconBadge
-                  url={sub.url}
-                  icon="link"
-                  fallbackWrapClass={t.iconWrap}
-                  fallbackIconClass={t.icon}
-                  className="h-8 w-8"
-                />
-                <span className={`truncate text-sm ${t.linkLabel}`}>{sub.label || "Untitled"}</span>
-              </>
-            );
-            const subClassName = `flex items-center gap-2.5 rounded-xl border px-3 py-2 transition ${t.linkBlock}`;
+      {/* sub-links: a connected mini-list, deliberately lighter than the parent card */}
+      {hasSubLinks && (
+        <div
+          className={`grid transition-all duration-300 ease-out ${
+            expanded ? "mt-1.5 grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+          }`}
+        >
+          <div className="relative overflow-hidden pl-[1.625rem]">
+            <div className={`absolute left-[0.9375rem] top-0 bottom-2 w-px ${t.divider}`} />
+            <div className="space-y-0.5 py-1">
+              {subLinks.map((sub) => {
+                const subContent = (
+                  <>
+                    <span className={`absolute -left-[1.625rem] h-1.5 w-1.5 rounded-full ${t.divider}`} />
+                    <LinkIconBadge
+                      url={sub.url}
+                      icon="link"
+                      fallbackWrapClass={t.iconWrap}
+                      fallbackIconClass={t.icon}
+                      className="h-6 w-6"
+                    />
+                    <span className={`min-w-0 flex-1 truncate text-xs ${t.linkSub}`}>
+                      {sub.label || "Untitled"}
+                    </span>
+                    <ArrowUpRight
+                      className={`h-3 w-3 shrink-0 opacity-0 transition-opacity group-hover:opacity-60 ${t.chevron}`}
+                    />
+                  </>
+                );
+                const subClassName = `group relative flex items-center gap-2 rounded-lg px-2 py-1.5 transition hover:bg-black/[0.03] dark:hover:bg-white/[0.06]`;
 
-            return mode === "live" ? (
-              <a
-                key={sub.id}
-                href={subHref(sub.id) ?? sub.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={subClassName}
-              >
-                {subContent}
-              </a>
-            ) : (
-              <div key={sub.id} className={subClassName}>
-                {subContent}
-              </div>
-            );
-          })}
+                return mode === "live" ? (
+                  <a
+                    key={sub.id}
+                    href={subHref(sub.id) ?? sub.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={subClassName}
+                  >
+                    {subContent}
+                  </a>
+                ) : (
+                  <div key={sub.id} className={subClassName}>
+                    {subContent}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
       )}
     </div>

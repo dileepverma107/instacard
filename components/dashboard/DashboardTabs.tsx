@@ -20,7 +20,7 @@ export function DashboardTabs({
 
   return (
     <div>
-      <div className="mb-6 flex w-fit gap-1 rounded-xl border border-white/60 bg-white/50 p-1 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-white/5">
+      <div className="mb-6 flex w-fit animate-card-in gap-1 rounded-xl border border-white/60 bg-white/50 p-1 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-white/5">
         {(["card", "analytics"] as const).map((t) => (
           <button
             key={t}

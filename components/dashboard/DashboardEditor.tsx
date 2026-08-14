@@ -59,8 +59,36 @@ function emptySubLink(): SubLink {
 
 const cardClass =
   "rounded-3xl border border-white/60 bg-white/70 p-6 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.04]";
-const sectionIconClass =
-  "flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-tr from-amber-400/20 via-pink-500/20 to-purple-600/20 text-pink-600 dark:text-pink-400";
+
+const ACCENTS = {
+  violet: {
+    card: "border-l-4 border-l-violet-400 dark:border-l-violet-500",
+    icon: "bg-violet-500/10 text-violet-600 dark:bg-violet-500/15 dark:text-violet-400",
+  },
+  pink: {
+    card: "border-l-4 border-l-pink-400 dark:border-l-pink-500",
+    icon: "bg-pink-500/10 text-pink-600 dark:bg-pink-500/15 dark:text-pink-400",
+  },
+  amber: {
+    card: "border-l-4 border-l-amber-400 dark:border-l-amber-500",
+    icon: "bg-amber-500/10 text-amber-600 dark:bg-amber-500/15 dark:text-amber-400",
+  },
+  emerald: {
+    card: "border-l-4 border-l-emerald-400 dark:border-l-emerald-500",
+    icon: "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400",
+  },
+} as const;
+
+function sectionCard(accent: keyof typeof ACCENTS) {
+  return `${cardClass} ${ACCENTS[accent].card}`;
+}
+function sectionIcon(accent: keyof typeof ACCENTS) {
+  return `flex h-7 w-7 items-center justify-center rounded-lg ${ACCENTS[accent].icon}`;
+}
+function entrance(delayMs: number): { className: string; style: React.CSSProperties } {
+  return { className: "animate-card-in", style: { animationDelay: `${delayMs}ms` } };
+}
+
 const inputClass =
   "w-full rounded-2xl border border-neutral-200 bg-white/80 px-3.5 py-2.5 text-sm text-neutral-900 placeholder-neutral-400 shadow-sm outline-none transition focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-500/10 dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder-neutral-500 dark:focus:bg-white/10";
 const compactInputClass =
@@ -265,9 +293,9 @@ export function DashboardEditor({
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_320px]">
       <div className="space-y-6">
         {/* profile */}
-        <section className={cardClass}>
+        <section className={`${sectionCard("violet")} ${entrance(0).className}`} style={entrance(0).style}>
           <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-white">
-            <span className={sectionIconClass}>
+            <span className={sectionIcon("violet")}>
               <User className="h-4 w-4" />
             </span>
             Profile
@@ -360,10 +388,10 @@ export function DashboardEditor({
         </section>
 
         {/* links */}
-        <section className={cardClass}>
+        <section className={`${sectionCard("pink")} ${entrance(60).className}`} style={entrance(60).style}>
           <div className="mb-4 flex items-center justify-between">
             <h2 className="flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-white">
-              <span className={sectionIconClass}>
+              <span className={sectionIcon("pink")}>
                 <Link2 className="h-4 w-4" />
               </span>
               Links <span className={`font-normal ${faintTextClass}`}>({links.length}/{MAX_LINKS})</span>
@@ -529,9 +557,12 @@ export function DashboardEditor({
         </section>
 
         {/* template */}
-        <section className={cardClass}>
+        <section
+          className={`${sectionCard("amber")} ${entrance(120).className}`}
+          style={entrance(120).style}
+        >
           <h2 className="mb-1 flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-white">
-            <span className={sectionIconClass}>
+            <span className={sectionIcon("amber")}>
               <Palette className="h-4 w-4" />
             </span>
             Template
@@ -569,11 +600,14 @@ export function DashboardEditor({
         </section>
 
         {/* publish */}
-        <section className={cardClass}>
+        <section
+          className={`${sectionCard("emerald")} ${entrance(180).className}`}
+          style={entrance(180).style}
+        >
           <div className="flex items-center justify-between">
             <div>
               <h2 className="flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-white">
-                <span className={sectionIconClass}>
+                <span className={sectionIcon("emerald")}>
                   <Rocket className="h-4 w-4" />
                 </span>
                 Publish
@@ -617,7 +651,10 @@ export function DashboardEditor({
           </div>
         </section>
 
-        <div className="flex items-center gap-3">
+        <div
+          className={`flex items-center gap-3 ${entrance(240).className}`}
+          style={entrance(240).style}
+        >
           <button
             onClick={handleSave}
             disabled={pending}
@@ -640,7 +677,10 @@ export function DashboardEditor({
       </div>
 
       {/* live preview */}
-      <div className="lg:sticky lg:top-6 lg:h-fit">
+      <div
+        className={`lg:sticky lg:top-6 lg:h-fit ${entrance(100).className}`}
+        style={entrance(100).style}
+      >
         <p className={`mb-3 text-center text-xs font-medium uppercase tracking-wide ${faintTextClass}`}>
           Live preview
         </p>
