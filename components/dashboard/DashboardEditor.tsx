@@ -15,22 +15,28 @@ import {
   Palette,
   Rocket,
   ChevronDown,
+  Star,
+  Sparkles,
 } from "lucide-react";
 import { PhoneFrame } from "@/components/PhoneFrame";
 import { CreatorCard } from "@/components/CreatorCard";
 import { LinkIconBadge } from "@/components/LinkIconBadge";
+import { LinkIconGlyph } from "@/components/LinkIcon";
 import { createClient } from "@/lib/supabase/client";
 import {
+  CREATOR_TYPES,
   LINK_ICONS,
   MAX_LINKS,
   MAX_SUB_LINKS,
   TEMPLATES,
   type Creator,
+  type CreatorType,
   type LinkBlock,
   type LinkType,
   type SubLink,
   type Template,
 } from "@/lib/types";
+import { LINK_PRESETS } from "@/lib/linkPresets";
 import { saveCard, type SaveLinkInput } from "@/app/dashboard/actions";
 
 const MAX_AVATAR_BYTES = 5 * 1024 * 1024;
@@ -50,6 +56,7 @@ function emptyLink(): EditableLink {
     icon: "link",
     url: "",
     sub_links: [],
+    is_featured: false,
   };
 }
 
@@ -115,6 +122,7 @@ export function DashboardEditor({
   const [followerCount, setFollowerCount] = useState(creator.follower_count);
   const [avatarUrl, setAvatarUrl] = useState(creator.avatar_url ?? "");
   const [template, setTemplate] = useState<Template>(creator.template ?? "aurora");
+  const [creatorType, setCreatorType] = useState<CreatorType>(creator.creator_type ?? "general");
   const [isPublished, setIsPublished] = useState(creator.is_published);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -129,6 +137,7 @@ export function DashboardEditor({
       icon: l.icon,
       url: l.url,
       sub_links: l.sub_links ?? [],
+      is_featured: l.is_featured,
     })),
   );
   const [pending, startTransition] = useTransition();
@@ -147,7 +156,7 @@ export function DashboardEditor({
         url: l.url,
         sub_links: l.sub_links,
         sort_order: i,
-        is_featured: i === 0,
+        is_featured: l.is_featured,
         created_at: "",
       })),
     [links, creator.id],
@@ -162,8 +171,31 @@ export function DashboardEditor({
     setLinks((prev) => [...prev, emptyLink()]);
   }
 
+  function addPresetLink(preset: (typeof LINK_PRESETS)[CreatorType][number]) {
+    if (links.length >= MAX_LINKS) return;
+    setLinks((prev) => [
+      ...prev,
+      {
+        ...emptyLink(),
+        label: preset.label,
+        sub_label: preset.sub_label,
+        icon: preset.icon,
+        type: preset.type,
+      },
+    ]);
+  }
+
   function removeLink(tempId: string) {
     setLinks((prev) => prev.filter((l) => l.tempId !== tempId));
+  }
+
+  function toggleFeatured(tempId: string) {
+    setLinks((prev) =>
+      prev.map((l) => ({
+        ...l,
+        is_featured: l.tempId === tempId ? !l.is_featured : false,
+      })),
+    );
   }
 
   function moveLink(index: number, dir: -1 | 1) {
@@ -256,14 +288,16 @@ export function DashboardEditor({
         follower_count: followerCount,
         avatar_url: avatarUrl,
         template,
+        creator_type: creatorType,
         is_published: isPublished,
-        links: links.map(({ type, label, sub_label, icon, url, sub_links }) => ({
+        links: links.map(({ type, label, sub_label, icon, url, sub_links, is_featured }) => ({
           type,
           label,
           sub_label,
           icon,
           url,
           sub_links,
+          is_featured,
         })),
       });
       if (result.ok) {
@@ -288,6 +322,11 @@ export function DashboardEditor({
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
   }
+
+  const existingLabels = new Set(links.map((l) => l.label.trim().toLowerCase()));
+  const suggestedPresets = LINK_PRESETS[creatorType].filter(
+    (p) => !existingLabels.has(p.label.toLowerCase()),
+  );
 
   return (
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_320px]">
@@ -328,6 +367,44 @@ export function DashboardEditor({
                 onChange={(e) => setFollowerCount(Number(e.target.value))}
                 className={inputClass}
               />
+            </Field>
+            <Field label="Creator type" className="sm:col-span-2">
+              <p className={`-mt-1 mb-2 text-xs ${faintTextClass}`}>
+                Unlocks quick-add link suggestions tailored to your niche.
+              </p>
+              <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
+                {CREATOR_TYPES.map((ct) => (
+                  <button
+                    key={ct.id}
+                    type="button"
+                    onClick={() => setCreatorType(ct.id)}
+                    title={ct.name}
+                    className={`flex flex-col items-center gap-1 rounded-xl border p-2 text-center transition ${
+                      creatorType === ct.id
+                        ? "border-violet-500 bg-violet-500/10 ring-2 ring-violet-500/20"
+                        : "border-neutral-200 bg-white/60 hover:border-neutral-300 dark:border-white/10 dark:bg-white/5 dark:hover:border-white/20"
+                    }`}
+                  >
+                    <LinkIconGlyph
+                      name={ct.icon}
+                      className={`h-4 w-4 ${
+                        creatorType === ct.id
+                          ? "text-violet-600 dark:text-violet-400"
+                          : "text-neutral-500 dark:text-neutral-400"
+                      }`}
+                    />
+                    <span
+                      className={`text-[10px] font-medium leading-tight ${
+                        creatorType === ct.id
+                          ? "text-violet-700 dark:text-violet-300"
+                          : "text-neutral-600 dark:text-neutral-400"
+                      }`}
+                    >
+                      {ct.name}
+                    </span>
+                  </button>
+                ))}
+              </div>
             </Field>
             <Field label="Profile photo" className="sm:col-span-2">
               <div className="flex items-center gap-4">
@@ -405,11 +482,39 @@ export function DashboardEditor({
             </button>
           </div>
 
+          {suggestedPresets.length > 0 && links.length < MAX_LINKS && (
+            <div className="mb-4 rounded-2xl border border-dashed border-pink-300/60 bg-pink-500/5 p-3 dark:border-pink-500/20 dark:bg-pink-500/5">
+              <p className="mb-2 flex items-center gap-1.5 text-xs font-medium text-pink-700 dark:text-pink-300">
+                <Sparkles className="h-3.5 w-3.5" />
+                Suggested for {CREATOR_TYPES.find((c) => c.id === creatorType)?.name}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {suggestedPresets.map((preset) => (
+                  <button
+                    key={preset.label}
+                    type="button"
+                    onClick={() => addPresetLink(preset)}
+                    disabled={links.length >= MAX_LINKS}
+                    className="flex items-center gap-1.5 rounded-full border border-pink-300/60 bg-white/80 px-3 py-1.5 text-xs font-medium text-neutral-700 shadow-sm transition hover:border-pink-400 hover:bg-white disabled:opacity-40 dark:border-pink-500/30 dark:bg-white/5 dark:text-neutral-200 dark:hover:bg-white/10"
+                  >
+                    <LinkIconGlyph name={preset.icon} className="h-3.5 w-3.5 text-pink-500" />
+                    {preset.label}
+                    <Plus className="h-3 w-3 text-neutral-400" />
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="space-y-3">
             {links.map((link, i) => (
               <div
                 key={link.tempId}
-                className="rounded-2xl border border-neutral-200 bg-white/60 p-4 shadow-sm dark:border-white/10 dark:bg-white/[0.03]"
+                className={`rounded-2xl border bg-white/60 p-4 shadow-sm dark:bg-white/[0.03] ${
+                  link.is_featured
+                    ? "border-amber-300 ring-1 ring-amber-300/50 dark:border-amber-500/40 dark:ring-amber-500/20"
+                    : "border-neutral-200 dark:border-white/10"
+                }`}
               >
                 <div className="mb-3 flex items-center gap-2">
                   <LinkIconBadge
@@ -443,6 +548,18 @@ export function DashboardEditor({
                     ))}
                   </select>
                   <div className="ml-auto flex items-center gap-1">
+                    <button
+                      onClick={() => toggleFeatured(link.tempId)}
+                      className={`rounded-md p-1 transition ${
+                        link.is_featured
+                          ? "text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-500/10"
+                          : "text-neutral-400 hover:bg-neutral-100 dark:text-neutral-500 dark:hover:bg-white/10"
+                      }`}
+                      title={link.is_featured ? "Remove featured" : "Mark as featured"}
+                      aria-label="Toggle featured"
+                    >
+                      <Star className={`h-4 w-4 ${link.is_featured ? "fill-current" : ""}`} />
+                    </button>
                     <button
                       onClick={() => moveLink(i, -1)}
                       disabled={i === 0}

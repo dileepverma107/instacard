@@ -11,6 +11,7 @@ const SAMPLE_LINKS = [
     icon: "shopping-bag",
     url: "#",
     sub_links: [],
+    is_featured: true,
   },
   {
     id: "2",
@@ -19,6 +20,7 @@ const SAMPLE_LINKS = [
     icon: "briefcase",
     url: "#",
     sub_links: [],
+    is_featured: false,
   },
   {
     id: "3",
@@ -27,6 +29,7 @@ const SAMPLE_LINKS = [
     icon: "youtube",
     url: "#",
     sub_links: [],
+    is_featured: false,
   },
   {
     id: "4",
@@ -35,6 +38,7 @@ const SAMPLE_LINKS = [
     icon: "message-circle",
     url: "#",
     sub_links: [],
+    is_featured: false,
   },
 ];
 

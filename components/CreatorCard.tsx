@@ -10,7 +10,7 @@ export interface CreatorCardProps {
   avatarUrl: string | null;
   followerCount: number;
   bioLine: string;
-  links: Pick<LinkBlock, "id" | "label" | "sub_label" | "icon" | "url" | "sub_links">[];
+  links: Pick<LinkBlock, "id" | "label" | "sub_label" | "icon" | "url" | "sub_links" | "is_featured">[];
   showBranding: boolean;
   template?: Template;
   /** "live" renders real navigable anchors and plays the entrance animation (public page).

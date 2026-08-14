@@ -3,7 +3,16 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { MAX_LINKS, MAX_SUB_LINKS, TEMPLATES, type LinkType, type SubLink, type Template } from "@/lib/types";
+import {
+  CREATOR_TYPES,
+  MAX_LINKS,
+  MAX_SUB_LINKS,
+  TEMPLATES,
+  type CreatorType,
+  type LinkType,
+  type SubLink,
+  type Template,
+} from "@/lib/types";
 
 const HANDLE_RE = /^[a-z0-9_.]{2,30}$/;
 
@@ -15,6 +24,7 @@ export interface SaveLinkInput {
   icon: string;
   url: string;
   sub_links: SubLink[];
+  is_featured: boolean;
 }
 
 export interface SaveCardInput {
@@ -24,6 +34,7 @@ export interface SaveCardInput {
   follower_count: number;
   avatar_url: string;
   template: Template;
+  creator_type: CreatorType;
   is_published: boolean;
   links: SaveLinkInput[];
 }
@@ -53,6 +64,9 @@ export async function saveCard(input: SaveCardInput): Promise<SaveCardResult> {
   if (!TEMPLATES.some((t) => t.id === input.template)) {
     return { ok: false, error: "Unknown template." };
   }
+  if (!CREATOR_TYPES.some((t) => t.id === input.creator_type)) {
+    return { ok: false, error: "Unknown creator type." };
+  }
 
   const { data: creator, error: creatorError } = await supabase
     .from("creators")
@@ -63,6 +77,7 @@ export async function saveCard(input: SaveCardInput): Promise<SaveCardResult> {
       follower_count: Math.max(0, Math.floor(input.follower_count) || 0),
       avatar_url: input.avatar_url.trim() || null,
       template: input.template,
+      creator_type: input.creator_type,
       is_published: input.is_published,
     })
     .eq("user_id", user.id)
@@ -93,7 +108,7 @@ export async function saveCard(input: SaveCardInput): Promise<SaveCardResult> {
         .filter((s) => s.label.trim() || s.url.trim())
         .map((s) => ({ id: s.id, label: s.label.trim(), url: s.url.trim() })),
       sort_order: i,
-      is_featured: i === 0,
+      is_featured: link.is_featured,
     }));
     const { error: insertError } = await supabase.from("links").insert(rows);
     if (insertError) return { ok: false, error: insertError.message };

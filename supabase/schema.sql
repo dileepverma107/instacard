@@ -16,6 +16,11 @@ create table if not exists creators (
   bio_line        text not null default '',
   plan            text not null default 'free' check (plan in ('free', 'premium')),
   template        text not null default 'aurora' check (template in ('aurora', 'paper', 'neon')),
+  creator_type    text not null default 'general' check (creator_type in (
+                    'general', 'fashion_beauty', 'fitness_health', 'music_audio',
+                    'education_coaching', 'business_local', 'gaming_streaming',
+                    'food_culinary', 'photography_art'
+                  )),
   is_published    boolean not null default false,
   created_at      timestamptz not null default now(),
   updated_at      timestamptz not null default now()

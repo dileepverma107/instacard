@@ -12,6 +12,11 @@ import {
   Music,
   Shirt,
   Star,
+  HeartPulse,
+  GraduationCap,
+  Store,
+  Gamepad2,
+  Utensils,
   type LucideIcon,
 } from "lucide-react";
 
@@ -30,6 +35,11 @@ const ICON_MAP: Record<string, LucideIcon> = {
   music: Music,
   shirt: Shirt,
   star: Star,
+  "heart-pulse": HeartPulse,
+  "graduation-cap": GraduationCap,
+  store: Store,
+  "gamepad-2": Gamepad2,
+  utensils: Utensils,
 };
 
 export function LinkIconGlyph({ name, className }: { name: string; className?: string }) {

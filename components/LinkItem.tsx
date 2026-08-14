@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronRight, ChevronDown, ArrowUpRight } from "lucide-react";
+import { ChevronRight, ChevronDown, ArrowUpRight, Star } from "lucide-react";
 import { LinkIconBadge } from "./LinkIconBadge";
 import type { LinkBlock } from "@/lib/types";
 import type { TemplateTheme } from "@/lib/templateTheme";
 
 export interface LinkItemProps {
-  link: Pick<LinkBlock, "id" | "label" | "sub_label" | "icon" | "url" | "sub_links">;
+  link: Pick<LinkBlock, "id" | "label" | "sub_label" | "icon" | "url" | "sub_links" | "is_featured">;
   theme: TemplateTheme;
   mode: "live" | "preview";
   /** Base path for the click-tracking redirect route (e.g. "/r"). When set,
@@ -60,23 +60,32 @@ export function LinkItem({
     </>
   );
 
+  const mainRow = hasSubLinks ? (
+    <button type="button" onClick={() => setExpanded((v) => !v)} className={rowClassName}>
+      {rowContent}
+    </button>
+  ) : mode === "live" ? (
+    <a href={mainHref} target="_blank" rel="noopener noreferrer" className={rowClassName}>
+      {rowContent}
+    </a>
+  ) : (
+    <div className={rowClassName}>{rowContent}</div>
+  );
+
   return (
-    <div className={animClassName} style={animStyle}>
-      {hasSubLinks ? (
-        <button type="button" onClick={() => setExpanded((v) => !v)} className={rowClassName}>
-          {rowContent}
-        </button>
-      ) : mode === "live" ? (
-        <a
-          href={mainHref}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={rowClassName}
-        >
-          {rowContent}
-        </a>
+    <div className={`relative ${animClassName ?? ""}`} style={animStyle}>
+      {link.is_featured ? (
+        <div className="rounded-[1.15rem] bg-gradient-to-tr from-amber-400 via-pink-500 to-purple-600 p-[2px]">
+          {mainRow}
+        </div>
       ) : (
-        <div className={rowClassName}>{rowContent}</div>
+        mainRow
+      )}
+
+      {link.is_featured && (
+        <span className="absolute -top-2 right-3 z-10 flex items-center gap-1 rounded-full bg-gradient-to-tr from-amber-400 via-pink-500 to-purple-600 px-2 py-0.5 text-[10px] font-semibold text-white shadow">
+          <Star className="h-2.5 w-2.5 fill-current" /> Featured
+        </span>
       )}
 
       {/* sub-links: a connected mini-list, deliberately lighter than the parent card */}

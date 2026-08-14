@@ -32,6 +32,35 @@ export const TEMPLATES: TemplateMeta[] = [
   },
 ];
 
+export type CreatorType =
+  | "general"
+  | "fashion_beauty"
+  | "fitness_health"
+  | "music_audio"
+  | "education_coaching"
+  | "business_local"
+  | "gaming_streaming"
+  | "food_culinary"
+  | "photography_art";
+
+export interface CreatorTypeMeta {
+  id: CreatorType;
+  name: string;
+  icon: string;
+}
+
+export const CREATOR_TYPES: CreatorTypeMeta[] = [
+  { id: "general", name: "General creator", icon: "star" },
+  { id: "fashion_beauty", name: "Fashion & Beauty", icon: "shirt" },
+  { id: "fitness_health", name: "Fitness & Health", icon: "heart-pulse" },
+  { id: "music_audio", name: "Music & Audio", icon: "music" },
+  { id: "education_coaching", name: "Education & Coaching", icon: "graduation-cap" },
+  { id: "business_local", name: "Business & Local Shop", icon: "store" },
+  { id: "gaming_streaming", name: "Gaming & Streaming", icon: "gamepad-2" },
+  { id: "food_culinary", name: "Food & Culinary", icon: "utensils" },
+  { id: "photography_art", name: "Photography & Art", icon: "camera" },
+];
+
 export interface Creator {
   id: string;
   user_id: string;
@@ -42,6 +71,7 @@ export interface Creator {
   bio_line: string;
   plan: Plan;
   template: Template;
+  creator_type: CreatorType;
   is_published: boolean;
   created_at: string;
   updated_at: string;
@@ -94,4 +124,9 @@ export const LINK_ICONS = [
   "music",
   "shirt",
   "star",
+  "heart-pulse",
+  "graduation-cap",
+  "store",
+  "gamepad-2",
+  "utensils",
 ] as const;
