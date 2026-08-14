@@ -20,6 +20,7 @@ export interface TemplateTheme {
   linkLabel: string;
   linkSub: string;
   chevron: string;
+  formInput: string;
   footerBorder: string;
   footerText: string;
   footerBrand: string;
@@ -46,6 +47,7 @@ export const THEME: Record<Template, TemplateTheme> = {
     linkLabel: "text-white",
     linkSub: "text-white/50",
     chevron: "text-white/30",
+    formInput: "border-white/10 bg-white/[0.06] text-white placeholder-white/40 focus:border-white/25",
     footerBorder: "border-white/5",
     footerText: "text-white/30",
     footerBrand: "text-white/50",
@@ -70,6 +72,7 @@ export const THEME: Record<Template, TemplateTheme> = {
     linkLabel: "text-neutral-900",
     linkSub: "text-neutral-400",
     chevron: "text-neutral-300",
+    formInput: "border-neutral-200 bg-white text-neutral-900 placeholder-neutral-400 focus:border-neutral-300",
     footerBorder: "border-neutral-200",
     footerText: "text-neutral-300",
     footerBrand: "text-neutral-500",
@@ -95,6 +98,7 @@ export const THEME: Record<Template, TemplateTheme> = {
     linkLabel: "text-white",
     linkSub: "text-fuchsia-200/40",
     chevron: "text-fuchsia-300/40",
+    formInput: "border-fuchsia-500/25 bg-white/[0.04] text-white placeholder-fuchsia-200/40 focus:border-fuchsia-400/50",
     footerBorder: "border-fuchsia-500/20",
     footerText: "text-fuchsia-200/30",
     footerBrand: "text-fuchsia-200/60",

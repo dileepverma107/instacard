@@ -1,5 +1,6 @@
 import { ChevronLeft, MoreHorizontal } from "lucide-react";
 import { LinkItem } from "./LinkItem";
+import { LeadCaptureForm } from "./LeadCaptureForm";
 import { formatCount } from "@/lib/format";
 import { THEME } from "@/lib/templateTheme";
 import type { LinkBlock, Template } from "@/lib/types";
@@ -17,6 +18,8 @@ export interface CreatorCardProps {
    *  "preview" renders inert, static blocks (dashboard live preview). */
   mode: "live" | "preview";
   linkHrefBase?: string;
+  creatorId?: string;
+  leadCapture?: { enabled: boolean; heading: string; buttonText: string };
 }
 
 export function CreatorCard({
@@ -30,6 +33,8 @@ export function CreatorCard({
   template = "aurora",
   mode,
   linkHrefBase,
+  creatorId,
+  leadCapture,
 }: CreatorCardProps) {
   const t = THEME[template];
   const animated = mode === "live";
@@ -117,6 +122,20 @@ export function CreatorCard({
             );
           })}
         </div>
+
+        {leadCapture?.enabled && (
+          <div className="mt-2.5">
+            <LeadCaptureForm
+              creatorId={creatorId ?? ""}
+              heading={leadCapture.heading}
+              buttonText={leadCapture.buttonText}
+              theme={t}
+              mode={mode}
+              animClassName={enter(120 + links.length * 60).className}
+              animStyle={enter(120 + links.length * 60).style}
+            />
+          </div>
+        )}
       </div>
 
       {showBranding && (

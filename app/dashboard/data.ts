@@ -1,6 +1,6 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
-import type { Creator, LinkBlock } from "@/lib/types";
+import type { Creator, Lead, LinkBlock } from "@/lib/types";
 import { customAlphabet } from "nanoid";
 
 const suffix = customAlphabet("abcdefghijklmnopqrstuvwxyz0123456789", 5);
@@ -61,4 +61,15 @@ export async function getClickCounts(creatorId: string): Promise<Record<string, 
     counts[row.link_id] = (counts[row.link_id] ?? 0) + 1;
   }
   return counts;
+}
+
+export async function getLeads(creatorId: string): Promise<Lead[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("leads")
+    .select("*")
+    .eq("creator_id", creatorId)
+    .order("created_at", { ascending: false });
+
+  return (data as Lead[]) ?? [];
 }

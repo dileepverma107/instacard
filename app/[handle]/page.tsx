@@ -67,6 +67,12 @@ export default async function PublicCardPage({
           template={creator.template}
           mode="live"
           linkHrefBase="/r"
+          creatorId={creator.id}
+          leadCapture={{
+            enabled: creator.lead_capture_enabled,
+            heading: creator.lead_capture_heading,
+            buttonText: creator.lead_capture_button_text,
+          }}
         />
       </div>
     </div>

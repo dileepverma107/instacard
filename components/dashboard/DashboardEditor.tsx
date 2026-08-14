@@ -18,12 +18,14 @@ import {
   Sparkles,
   Circle,
   Camera,
+  Mail,
   type LucideIcon,
 } from "lucide-react";
 import { PhoneFrame } from "@/components/PhoneFrame";
 import { CreatorCard } from "@/components/CreatorCard";
 import { LinkIconBadge } from "@/components/LinkIconBadge";
 import { LinkIconGlyph } from "@/components/LinkIcon";
+import { LeadsPanel } from "./LeadsPanel";
 import { createClient } from "@/lib/supabase/client";
 import {
   CREATOR_TYPES,
@@ -33,6 +35,7 @@ import {
   TEMPLATES,
   type Creator,
   type CreatorType,
+  type Lead,
   type LinkBlock,
   type LinkType,
   type SubLink,
@@ -82,6 +85,9 @@ const ACCENTS = {
   emerald: {
     icon: "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400",
   },
+  sky: {
+    icon: "bg-sky-500/10 text-sky-600 dark:bg-sky-500/15 dark:text-sky-400",
+  },
 } as const;
 
 function sectionIcon(accent: keyof typeof ACCENTS) {
@@ -91,12 +97,13 @@ function entrance(delayMs: number): { className: string; style: React.CSSPropert
   return { className: "animate-card-in", style: { animationDelay: `${delayMs}ms` } };
 }
 
-type Section = "profile" | "links" | "design" | "publish";
+type Section = "profile" | "links" | "design" | "leads" | "publish";
 
 const SECTIONS: { id: Section; label: string; icon: LucideIcon; accent: keyof typeof ACCENTS }[] = [
   { id: "profile", label: "Profile", icon: User, accent: "violet" },
   { id: "links", label: "Links", icon: Link2, accent: "pink" },
   { id: "design", label: "Design", icon: Palette, accent: "amber" },
+  { id: "leads", label: "Leads", icon: Mail, accent: "sky" },
   { id: "publish", label: "Publish", icon: Rocket, accent: "emerald" },
 ];
 
@@ -116,9 +123,11 @@ const linkIconBadgeFallback = {
 export function DashboardEditor({
   creator,
   initialLinks,
+  initialLeads,
 }: {
   creator: Creator;
   initialLinks: LinkBlock[];
+  initialLeads: Lead[];
 }) {
   const [handle, setHandle] = useState(creator.handle);
   const [name, setName] = useState(creator.name);
@@ -128,6 +137,14 @@ export function DashboardEditor({
   const [template, setTemplate] = useState<Template>(creator.template ?? "aurora");
   const [creatorType, setCreatorType] = useState<CreatorType>(creator.creator_type ?? "general");
   const [isPublished, setIsPublished] = useState(creator.is_published);
+  const [leadCaptureEnabled, setLeadCaptureEnabled] = useState(creator.lead_capture_enabled);
+  const [leadCaptureHeading, setLeadCaptureHeading] = useState(
+    creator.lead_capture_heading || "Get updates from me",
+  );
+  const [leadCaptureButtonText, setLeadCaptureButtonText] = useState(
+    creator.lead_capture_button_text || "Subscribe",
+  );
+  const [leads, setLeads] = useState<Lead[]>(initialLeads);
   const [activeSection, setActiveSection] = useState<Section>("profile");
   const [expandedLinks, setExpandedLinks] = useState<Set<string>>(new Set());
   const [uploading, setUploading] = useState(false);
@@ -307,6 +324,9 @@ export function DashboardEditor({
         template,
         creator_type: creatorType,
         is_published: isPublished,
+        lead_capture_enabled: leadCaptureEnabled,
+        lead_capture_heading: leadCaptureHeading,
+        lead_capture_button_text: leadCaptureButtonText,
         links: links.map(({ type, label, sub_label, icon, url, sub_links, is_featured }) => ({
           type,
           label,
@@ -820,6 +840,68 @@ export function DashboardEditor({
         </section>
         )}
 
+        {/* leads */}
+        {activeSection === "leads" && (
+        <section className={`${cardClass} ${entrance(0).className}`} style={entrance(0).style}>
+          <div className="flex items-center justify-between">
+            <h2 className="flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-white">
+              <span className={sectionIcon("sky")}>
+                <Mail className="h-4 w-4" />
+              </span>
+              Lead capture
+            </h2>
+            <button
+              onClick={() => setLeadCaptureEnabled((v) => !v)}
+              className={`relative h-7 w-12 rounded-full transition ${
+                leadCaptureEnabled ? "bg-sky-500" : "bg-neutral-300 dark:bg-white/10"
+              }`}
+              aria-label="Toggle lead capture"
+            >
+              <span
+                className={`absolute top-1 h-5 w-5 rounded-full bg-white transition ${
+                  leadCaptureEnabled ? "left-6" : "left-1"
+                }`}
+              />
+            </button>
+          </div>
+          <p className={`mt-1 text-xs ${mutedTextClass}`}>
+            Adds a small sign-up form to the bottom of your card so visitors can leave their email
+            or WhatsApp — build a list you own, instead of relying only on Instagram reach.
+          </p>
+
+          {leadCaptureEnabled && (
+            <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <Field label="Heading">
+                <input
+                  value={leadCaptureHeading}
+                  onChange={(e) => setLeadCaptureHeading(e.target.value)}
+                  className={inputClass}
+                  placeholder="Get updates from me"
+                />
+              </Field>
+              <Field label="Button text">
+                <input
+                  value={leadCaptureButtonText}
+                  onChange={(e) => setLeadCaptureButtonText(e.target.value)}
+                  className={inputClass}
+                  placeholder="Subscribe"
+                />
+              </Field>
+            </div>
+          )}
+
+          <div className="mt-5 border-t border-neutral-200 pt-4 dark:border-white/10">
+            <h3 className="text-sm font-semibold text-neutral-900 dark:text-white">
+              Collected leads
+            </h3>
+            <LeadsPanel
+              leads={leads}
+              onDeleted={(id) => setLeads((prev) => prev.filter((l) => l.id !== id))}
+            />
+          </div>
+        </section>
+        )}
+
         {/* publish */}
         {activeSection === "publish" && (
         <section className={`${cardClass} ${entrance(0).className}`} style={entrance(0).style}>
@@ -910,6 +992,12 @@ export function DashboardEditor({
             showBranding={creator.plan === "free"}
             template={template}
             mode="preview"
+            creatorId={creator.id}
+            leadCapture={{
+              enabled: leadCaptureEnabled,
+              heading: leadCaptureHeading,
+              buttonText: leadCaptureButtonText,
+            }}
           />
         </PhoneFrame>
       </div>

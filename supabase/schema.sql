@@ -22,6 +22,9 @@ create table if not exists creators (
                     'food_culinary', 'photography_art'
                   )),
   is_published    boolean not null default false,
+  lead_capture_enabled     boolean not null default false,
+  lead_capture_heading     text not null default 'Get updates from me',
+  lead_capture_button_text text not null default 'Subscribe',
   created_at      timestamptz not null default now(),
   updated_at      timestamptz not null default now()
 );
@@ -79,6 +82,19 @@ create table if not exists subscriptions (
 create index if not exists subscriptions_creator_id_idx on subscriptions (creator_id);
 
 -- ---------------------------------------------------------------------------
+-- leads (lead-capture block submissions)
+-- ---------------------------------------------------------------------------
+create table if not exists leads (
+  id          uuid primary key default gen_random_uuid(),
+  creator_id  uuid not null references creators (id) on delete cascade,
+  name        text,
+  contact     text not null,
+  created_at  timestamptz not null default now()
+);
+
+create index if not exists leads_creator_id_idx on leads (creator_id, created_at);
+
+-- ---------------------------------------------------------------------------
 -- updated_at trigger for creators
 -- ---------------------------------------------------------------------------
 create or replace function set_updated_at()
@@ -101,6 +117,7 @@ alter table creators enable row level security;
 alter table links enable row level security;
 alter table click_events enable row level security;
 alter table subscriptions enable row level security;
+alter table leads enable row level security;
 
 -- creators: owner has full access
 drop policy if exists "creators_owner_all" on creators;
@@ -149,6 +166,31 @@ create policy "subscriptions_owner_all" on subscriptions
     exists (select 1 from creators c where c.id = subscriptions.creator_id and c.user_id = auth.uid())
   ) with check (
     exists (select 1 from creators c where c.id = subscriptions.creator_id and c.user_id = auth.uid())
+  );
+
+-- leads: anyone can submit a lead against a creator who has lead capture on
+drop policy if exists "leads_public_insert" on leads;
+create policy "leads_public_insert" on leads
+  for insert with check (
+    exists (
+      select 1 from creators c
+      where c.id = leads.creator_id
+        and c.is_published = true
+        and c.lead_capture_enabled = true
+    )
+  );
+
+-- leads: only the owning creator can read or delete their leads
+drop policy if exists "leads_owner_read" on leads;
+create policy "leads_owner_read" on leads
+  for select using (
+    exists (select 1 from creators c where c.id = leads.creator_id and c.user_id = auth.uid())
+  );
+
+drop policy if exists "leads_owner_delete" on leads;
+create policy "leads_owner_delete" on leads
+  for delete using (
+    exists (select 1 from creators c where c.id = leads.creator_id and c.user_id = auth.uid())
   );
 
 -- ---------------------------------------------------------------------------

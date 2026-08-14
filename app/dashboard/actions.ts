@@ -36,6 +36,9 @@ export interface SaveCardInput {
   template: Template;
   creator_type: CreatorType;
   is_published: boolean;
+  lead_capture_enabled: boolean;
+  lead_capture_heading: string;
+  lead_capture_button_text: string;
   links: SaveLinkInput[];
 }
 
@@ -79,6 +82,9 @@ export async function saveCard(input: SaveCardInput): Promise<SaveCardResult> {
       template: input.template,
       creator_type: input.creator_type,
       is_published: input.is_published,
+      lead_capture_enabled: input.lead_capture_enabled,
+      lead_capture_heading: input.lead_capture_heading.trim() || "Get updates from me",
+      lead_capture_button_text: input.lead_capture_button_text.trim() || "Subscribe",
     })
     .eq("user_id", user.id)
     .select("id")
@@ -116,6 +122,14 @@ export async function saveCard(input: SaveCardInput): Promise<SaveCardResult> {
 
   revalidatePath("/dashboard");
   revalidatePath(`/${handle}`);
+  return { ok: true };
+}
+
+export async function deleteLead(leadId: string): Promise<SaveCardResult> {
+  const supabase = await createClient();
+  const { error } = await supabase.from("leads").delete().eq("id", leadId);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/dashboard");
   return { ok: true };
 }
 

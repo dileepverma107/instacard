@@ -73,8 +73,19 @@ export interface Creator {
   template: Template;
   creator_type: CreatorType;
   is_published: boolean;
+  lead_capture_enabled: boolean;
+  lead_capture_heading: string;
+  lead_capture_button_text: string;
   created_at: string;
   updated_at: string;
+}
+
+export interface Lead {
+  id: string;
+  creator_id: string;
+  name: string | null;
+  contact: string;
+  created_at: string;
 }
 
 export interface SubLink {
