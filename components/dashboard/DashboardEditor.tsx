@@ -57,15 +57,22 @@ function emptySubLink(): SubLink {
   return { id: crypto.randomUUID(), label: "", url: "" };
 }
 
-const cardClass = "rounded-3xl border border-white/60 bg-white/70 p-6 shadow-sm backdrop-blur-xl";
+const cardClass =
+  "rounded-3xl border border-white/60 bg-white/70 p-6 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.04]";
 const sectionIconClass =
-  "flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-tr from-amber-400/20 via-pink-500/20 to-purple-600/20 text-pink-600";
+  "flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-tr from-amber-400/20 via-pink-500/20 to-purple-600/20 text-pink-600 dark:text-pink-400";
 const inputClass =
-  "w-full rounded-2xl border border-neutral-200 bg-white/80 px-3.5 py-2.5 text-sm text-neutral-900 placeholder-neutral-400 shadow-sm outline-none transition focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-500/10";
+  "w-full rounded-2xl border border-neutral-200 bg-white/80 px-3.5 py-2.5 text-sm text-neutral-900 placeholder-neutral-400 shadow-sm outline-none transition focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-500/10 dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder-neutral-500 dark:focus:bg-white/10";
 const compactInputClass =
-  "rounded-xl border border-neutral-200 bg-white/80 px-2.5 py-1.5 text-xs text-neutral-900 placeholder-neutral-400 shadow-sm outline-none transition focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-500/10";
+  "rounded-xl border border-neutral-200 bg-white/80 px-2.5 py-1.5 text-xs text-neutral-900 placeholder-neutral-400 shadow-sm outline-none transition focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-500/10 dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder-neutral-500 dark:focus:bg-white/10";
 const selectClass =
-  "rounded-xl border border-neutral-200 bg-white/80 px-2.5 py-1.5 text-xs capitalize text-neutral-700 shadow-sm outline-none transition focus:border-pink-400 focus:ring-4 focus:ring-pink-500/10";
+  "rounded-xl border border-neutral-200 bg-white/80 px-2.5 py-1.5 text-xs capitalize text-neutral-700 shadow-sm outline-none transition focus:border-pink-400 focus:ring-4 focus:ring-pink-500/10 dark:border-white/10 dark:bg-white/5 dark:text-neutral-300";
+const mutedTextClass = "text-neutral-500 dark:text-neutral-400";
+const faintTextClass = "text-neutral-400 dark:text-neutral-500";
+const linkIconBadgeFallback = {
+  wrap: "bg-neutral-100 dark:bg-white/10",
+  icon: "text-neutral-500 dark:text-neutral-300",
+};
 
 export function DashboardEditor({
   creator,
@@ -259,7 +266,7 @@ export function DashboardEditor({
       <div className="space-y-6">
         {/* profile */}
         <section className={cardClass}>
-          <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold text-neutral-900">
+          <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-white">
             <span className={sectionIconClass}>
               <User className="h-4 w-4" />
             </span>
@@ -267,8 +274,8 @@ export function DashboardEditor({
           </h2>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Field label="Handle">
-              <div className="flex items-center gap-1.5 rounded-2xl border border-neutral-200 bg-white/80 px-3.5 py-2.5 text-sm shadow-sm transition focus-within:border-pink-400 focus-within:bg-white focus-within:ring-4 focus-within:ring-pink-500/10">
-                <span className="text-neutral-400">@</span>
+              <div className="flex items-center gap-1.5 rounded-2xl border border-neutral-200 bg-white/80 px-3.5 py-2.5 text-sm text-neutral-900 shadow-sm transition focus-within:border-pink-400 focus-within:bg-white focus-within:ring-4 focus-within:ring-pink-500/10 dark:border-white/10 dark:bg-white/5 dark:text-white dark:focus-within:bg-white/10">
+                <span className="text-neutral-400 dark:text-neutral-500">@</span>
                 <input
                   value={handle}
                   onChange={(e) => setHandle(e.target.value.toLowerCase())}
@@ -297,7 +304,7 @@ export function DashboardEditor({
             <Field label="Profile photo" className="sm:col-span-2">
               <div className="flex items-center gap-4">
                 <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-tr from-amber-400 via-pink-500 to-purple-600 p-[2px]">
-                  <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full bg-white text-lg font-semibold text-neutral-400">
+                  <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full bg-white text-lg font-semibold text-neutral-400 dark:bg-neutral-900 dark:text-neutral-500">
                     {avatarUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
@@ -318,7 +325,7 @@ export function DashboardEditor({
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={uploading}
-                    className="flex items-center gap-1.5 rounded-lg border border-neutral-300 bg-white/80 px-3 py-1.5 text-xs font-medium text-neutral-700 shadow-sm transition hover:bg-white disabled:opacity-60"
+                    className="flex items-center gap-1.5 rounded-lg border border-neutral-300 bg-white/80 px-3 py-1.5 text-xs font-medium text-neutral-700 shadow-sm transition hover:bg-white disabled:opacity-60 dark:border-white/10 dark:bg-white/5 dark:text-neutral-300 dark:hover:bg-white/10"
                   >
                     {uploading ? (
                       <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -333,7 +340,9 @@ export function DashboardEditor({
                     className={`${compactInputClass} mt-2 w-full`}
                     placeholder="…or paste an image URL"
                   />
-                  {uploadError && <p className="mt-1 text-xs text-red-500">{uploadError}</p>}
+                  {uploadError && (
+                    <p className="mt-1 text-xs text-red-500 dark:text-red-400">{uploadError}</p>
+                  )}
                 </div>
               </div>
             </Field>
@@ -353,16 +362,16 @@ export function DashboardEditor({
         {/* links */}
         <section className={cardClass}>
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="flex items-center gap-2 text-sm font-semibold text-neutral-900">
+            <h2 className="flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-white">
               <span className={sectionIconClass}>
                 <Link2 className="h-4 w-4" />
               </span>
-              Links <span className="font-normal text-neutral-400">({links.length}/{MAX_LINKS})</span>
+              Links <span className={`font-normal ${faintTextClass}`}>({links.length}/{MAX_LINKS})</span>
             </h2>
             <button
               onClick={addLink}
               disabled={links.length >= MAX_LINKS}
-              className="flex items-center gap-1 rounded-lg bg-neutral-900 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-neutral-800 disabled:opacity-40"
+              className="flex items-center gap-1 rounded-lg bg-neutral-900 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-neutral-800 disabled:opacity-40 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200"
             >
               <Plus className="h-3.5 w-3.5" /> Add link
             </button>
@@ -372,14 +381,14 @@ export function DashboardEditor({
             {links.map((link, i) => (
               <div
                 key={link.tempId}
-                className="rounded-2xl border border-neutral-200 bg-white/60 p-4 shadow-sm"
+                className="rounded-2xl border border-neutral-200 bg-white/60 p-4 shadow-sm dark:border-white/10 dark:bg-white/[0.03]"
               >
                 <div className="mb-3 flex items-center gap-2">
                   <LinkIconBadge
                     url={link.url}
                     icon={link.icon}
-                    fallbackWrapClass="bg-neutral-100"
-                    fallbackIconClass="text-neutral-500"
+                    fallbackWrapClass={linkIconBadgeFallback.wrap}
+                    fallbackIconClass={linkIconBadgeFallback.icon}
                     className="h-8 w-8"
                   />
                   <select
@@ -409,7 +418,7 @@ export function DashboardEditor({
                     <button
                       onClick={() => moveLink(i, -1)}
                       disabled={i === 0}
-                      className="rounded-md p-1 text-neutral-400 hover:bg-neutral-100 disabled:opacity-30"
+                      className="rounded-md p-1 text-neutral-400 hover:bg-neutral-100 disabled:opacity-30 dark:text-neutral-500 dark:hover:bg-white/10"
                       aria-label="Move up"
                     >
                       <ArrowUp className="h-4 w-4" />
@@ -417,14 +426,14 @@ export function DashboardEditor({
                     <button
                       onClick={() => moveLink(i, 1)}
                       disabled={i === links.length - 1}
-                      className="rounded-md p-1 text-neutral-400 hover:bg-neutral-100 disabled:opacity-30"
+                      className="rounded-md p-1 text-neutral-400 hover:bg-neutral-100 disabled:opacity-30 dark:text-neutral-500 dark:hover:bg-white/10"
                       aria-label="Move down"
                     >
                       <ArrowDown className="h-4 w-4" />
                     </button>
                     <button
                       onClick={() => removeLink(link.tempId)}
-                      className="rounded-md p-1 text-red-400 hover:bg-red-50"
+                      className="rounded-md p-1 text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10"
                       aria-label="Delete"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -453,25 +462,25 @@ export function DashboardEditor({
                 </div>
 
                 {/* sub-links */}
-                <div className="mt-3 border-t border-dashed border-neutral-200 pt-3">
+                <div className="mt-3 border-t border-dashed border-neutral-200 pt-3 dark:border-white/10">
                   <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-1 text-xs font-medium text-neutral-500">
+                    <span className={`flex items-center gap-1 text-xs font-medium ${mutedTextClass}`}>
                       <ChevronDown className="h-3.5 w-3.5" />
                       Sub-links{" "}
-                      <span className="font-normal text-neutral-400">
+                      <span className={`font-normal ${faintTextClass}`}>
                         ({link.sub_links.length}/{MAX_SUB_LINKS})
                       </span>
                     </span>
                     <button
                       onClick={() => addSubLink(link.tempId)}
                       disabled={link.sub_links.length >= MAX_SUB_LINKS}
-                      className="flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-pink-600 hover:bg-pink-50 disabled:opacity-40"
+                      className="flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-pink-600 hover:bg-pink-50 disabled:opacity-40 dark:text-pink-400 dark:hover:bg-pink-500/10"
                     >
                       <Plus className="h-3 w-3" /> Add sub-link
                     </button>
                   </div>
                   {link.sub_links.length > 0 && (
-                    <p className="mt-1 text-xs text-neutral-400">
+                    <p className={`mt-1 text-xs ${faintTextClass}`}>
                       Visitors tap this link to expand a mini-menu instead of navigating straight
                       away — great for grouping a few destinations under one block.
                     </p>
@@ -482,8 +491,8 @@ export function DashboardEditor({
                         <LinkIconBadge
                           url={sub.url}
                           icon="link"
-                          fallbackWrapClass="bg-neutral-100"
-                          fallbackIconClass="text-neutral-500"
+                          fallbackWrapClass={linkIconBadgeFallback.wrap}
+                          fallbackIconClass={linkIconBadgeFallback.icon}
                           className="h-7 w-7"
                         />
                         <input
@@ -502,7 +511,7 @@ export function DashboardEditor({
                         />
                         <button
                           onClick={() => removeSubLink(link.tempId, sub.id)}
-                          className="rounded-md p-1 text-red-400 hover:bg-red-50"
+                          className="rounded-md p-1 text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10"
                           aria-label="Remove sub-link"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
@@ -514,20 +523,20 @@ export function DashboardEditor({
               </div>
             ))}
             {links.length === 0 && (
-              <p className="text-sm text-neutral-400">No links yet — add up to {MAX_LINKS}.</p>
+              <p className={`text-sm ${faintTextClass}`}>No links yet — add up to {MAX_LINKS}.</p>
             )}
           </div>
         </section>
 
         {/* template */}
         <section className={cardClass}>
-          <h2 className="mb-1 flex items-center gap-2 text-sm font-semibold text-neutral-900">
+          <h2 className="mb-1 flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-white">
             <span className={sectionIconClass}>
               <Palette className="h-4 w-4" />
             </span>
             Template
           </h2>
-          <p className="mb-4 text-xs text-neutral-500">
+          <p className={`mb-4 text-xs ${mutedTextClass}`}>
             Free for everyone while we&apos;re in beta — some of these move to Premium later.
           </p>
           <div className="grid grid-cols-3 gap-3">
@@ -536,10 +545,10 @@ export function DashboardEditor({
                 key={t.id}
                 type="button"
                 onClick={() => setTemplate(t.id)}
-                className={`rounded-xl border bg-white/60 p-2 text-left shadow-sm transition ${
+                className={`rounded-xl border bg-white/60 p-2 text-left shadow-sm transition dark:bg-white/5 ${
                   template === t.id
                     ? "border-pink-500 ring-2 ring-pink-500/20"
-                    : "border-neutral-200 hover:border-neutral-300"
+                    : "border-neutral-200 hover:border-neutral-300 dark:border-white/10 dark:hover:border-white/20"
                 }`}
               >
                 <div
@@ -550,7 +559,7 @@ export function DashboardEditor({
                     <span key={i} className="h-full flex-1" style={{ backgroundColor: c }} />
                   ))}
                 </div>
-                <div className="flex items-center gap-1.5 text-xs font-medium text-neutral-900">
+                <div className="flex items-center gap-1.5 text-xs font-medium text-neutral-900 dark:text-white">
                   {t.name}
                   {template === t.id && <Check className="h-3 w-3 text-pink-500" />}
                 </div>
@@ -563,13 +572,13 @@ export function DashboardEditor({
         <section className={cardClass}>
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="flex items-center gap-2 text-sm font-semibold text-neutral-900">
+              <h2 className="flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-white">
                 <span className={sectionIconClass}>
                   <Rocket className="h-4 w-4" />
                 </span>
                 Publish
               </h2>
-              <p className="mt-1 flex items-center gap-2 text-xs text-neutral-500">
+              <p className={`mt-1 flex items-center gap-2 text-xs ${mutedTextClass}`}>
                 {isPublished ? "Your card is live at " : "Your card is unpublished."}
                 {isPublished && (
                   <>
@@ -577,14 +586,14 @@ export function DashboardEditor({
                       href={publicPath}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="font-medium text-pink-600 hover:underline"
+                      className="font-medium text-pink-600 hover:underline dark:text-pink-400"
                     >
                       {publicPath.replace(/^https?:\/\//, "")}
                     </a>
                     <button
                       onClick={copyLink}
                       aria-label="Copy link"
-                      className="text-neutral-400 hover:text-neutral-600"
+                      className="text-neutral-400 hover:text-neutral-600 dark:text-neutral-500 dark:hover:text-neutral-300"
                     >
                       {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
                     </button>
@@ -595,7 +604,7 @@ export function DashboardEditor({
             <button
               onClick={() => setIsPublished((p) => !p)}
               className={`relative h-7 w-12 rounded-full transition ${
-                isPublished ? "bg-emerald-500" : "bg-neutral-300"
+                isPublished ? "bg-emerald-500" : "bg-neutral-300 dark:bg-white/10"
               }`}
               aria-label="Toggle publish"
             >
@@ -617,7 +626,13 @@ export function DashboardEditor({
             {pending ? "Saving…" : "Save changes"}
           </button>
           {feedback && (
-            <span className={`text-sm ${feedback.kind === "ok" ? "text-emerald-600" : "text-red-500"}`}>
+            <span
+              className={`text-sm ${
+                feedback.kind === "ok"
+                  ? "text-emerald-600 dark:text-emerald-400"
+                  : "text-red-500 dark:text-red-400"
+              }`}
+            >
               {feedback.text}
             </span>
           )}
@@ -626,7 +641,7 @@ export function DashboardEditor({
 
       {/* live preview */}
       <div className="lg:sticky lg:top-6 lg:h-fit">
-        <p className="mb-3 text-center text-xs font-medium uppercase tracking-wide text-neutral-400">
+        <p className={`mb-3 text-center text-xs font-medium uppercase tracking-wide ${faintTextClass}`}>
           Live preview
         </p>
         <PhoneFrame>
@@ -658,7 +673,7 @@ function Field({
 }) {
   return (
     <label className={`block ${className ?? ""}`}>
-      <span className="mb-1.5 block text-xs font-medium text-neutral-500">{label}</span>
+      <span className={`mb-1.5 block text-xs font-medium ${mutedTextClass}`}>{label}</span>
       {children}
     </label>
   );
