@@ -51,7 +51,17 @@ export default async function PublicCardPage({
   const result = await getPublishedCreator(handle);
   if (!result) notFound();
 
-  const { creator, links } = result;
+  const { creator, links: allLinks } = result;
+
+  // This is a per-request Server Component render (not a client re-render),
+  // so reading the current time here to filter scheduled links is correct.
+  // eslint-disable-next-line react-hooks/purity
+  const now = Date.now();
+  const links = allLinks.filter((l) => {
+    if (l.starts_at && new Date(l.starts_at).getTime() > now) return false;
+    if (l.ends_at && new Date(l.ends_at).getTime() < now) return false;
+    return true;
+  });
 
   return (
     <div className="h-dvh bg-neutral-950">
@@ -62,6 +72,7 @@ export default async function PublicCardPage({
           avatarUrl={creator.avatar_url}
           followerCount={creator.follower_count}
           bioLine={creator.bio_line}
+          plan={creator.plan}
           links={links}
           showBranding={creator.plan === "free"}
           template={creator.template}
@@ -79,6 +90,11 @@ export default async function PublicCardPage({
             heading: creator.media_kit_heading,
             rateCard: creator.rate_card,
             pastCollabs: creator.past_collabs,
+          }}
+          gallery={{
+            enabled: creator.gallery_enabled,
+            heading: creator.gallery_heading,
+            images: creator.gallery_images,
           }}
         />
       </div>

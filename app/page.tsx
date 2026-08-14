@@ -12,6 +12,7 @@ const SAMPLE_LINKS = [
     url: "#",
     sub_links: [],
     is_featured: true,
+    ends_at: null,
   },
   {
     id: "2",
@@ -21,6 +22,7 @@ const SAMPLE_LINKS = [
     url: "#",
     sub_links: [],
     is_featured: false,
+    ends_at: null,
   },
   {
     id: "3",
@@ -30,6 +32,7 @@ const SAMPLE_LINKS = [
     url: "#",
     sub_links: [],
     is_featured: false,
+    ends_at: null,
   },
   {
     id: "4",
@@ -39,6 +42,7 @@ const SAMPLE_LINKS = [
     url: "#",
     sub_links: [],
     is_featured: false,
+    ends_at: null,
   },
 ];
 

@@ -35,6 +35,7 @@ import {
   ACCENT_PRESETS,
   CREATOR_TYPES,
   LINK_ICONS,
+  MAX_GALLERY_IMAGES,
   MAX_LINKS,
   MAX_PAST_COLLABS,
   MAX_RATE_CARD_ITEMS,
@@ -44,6 +45,7 @@ import {
   type BrandInquiry,
   type Creator,
   type CreatorType,
+  type GalleryImage,
   type Lead,
   type LinkBlock,
   type LinkType,
@@ -73,6 +75,8 @@ function emptyLink(): EditableLink {
     url: "",
     sub_links: [],
     is_featured: false,
+    starts_at: null,
+    ends_at: null,
   };
 }
 
@@ -86,6 +90,24 @@ function emptyRateCardItem(): RateCardItem {
 
 function emptyPastCollab(): PastCollab {
   return { id: crypto.randomUUID(), name: "", logo_url: "" };
+}
+
+function emptyGalleryImage(): GalleryImage {
+  return { id: crypto.randomUUID(), url: "" };
+}
+
+/** datetime-local inputs need "YYYY-MM-DDTHH:mm" in local time, with no trailing "Z". */
+function toDatetimeLocal(iso: string | null): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function fromDatetimeLocal(value: string): string | null {
+  if (!value) return null;
+  const d = new Date(value);
+  return Number.isNaN(d.getTime()) ? null : d.toISOString();
 }
 
 const cardClass =
@@ -176,6 +198,9 @@ export function DashboardEditor({
   const [rateCard, setRateCard] = useState<RateCardItem[]>(creator.rate_card ?? []);
   const [pastCollabs, setPastCollabs] = useState<PastCollab[]>(creator.past_collabs ?? []);
   const [brandInquiries, setBrandInquiries] = useState<BrandInquiry[]>(initialBrandInquiries);
+  const [galleryEnabled, setGalleryEnabled] = useState(creator.gallery_enabled);
+  const [galleryHeading, setGalleryHeading] = useState(creator.gallery_heading || "My work");
+  const [galleryImages, setGalleryImages] = useState<GalleryImage[]>(creator.gallery_images ?? []);
   const [activeSection, setActiveSection] = useState<Section>("profile");
   const [expandedLinks, setExpandedLinks] = useState<Set<string>>(new Set());
   const [uploading, setUploading] = useState(false);
@@ -193,6 +218,8 @@ export function DashboardEditor({
       url: l.url,
       sub_links: l.sub_links ?? [],
       is_featured: l.is_featured,
+      starts_at: l.starts_at,
+      ends_at: l.ends_at,
     })),
   );
   const [pending, startTransition] = useTransition();
@@ -212,6 +239,8 @@ export function DashboardEditor({
         sub_links: l.sub_links,
         sort_order: i,
         is_featured: l.is_featured,
+        starts_at: l.starts_at,
+        ends_at: l.ends_at,
         created_at: "",
       })),
     [links, creator.id],
@@ -328,6 +357,17 @@ export function DashboardEditor({
     setPastCollabs((prev) => prev.filter((c) => c.id !== id));
   }
 
+  function addGalleryImage() {
+    if (galleryImages.length >= MAX_GALLERY_IMAGES) return;
+    setGalleryImages((prev) => [...prev, emptyGalleryImage()]);
+  }
+  function updateGalleryImage(id: string, url: string) {
+    setGalleryImages((prev) => prev.map((g) => (g.id === id ? { ...g, url } : g)));
+  }
+  function removeGalleryImage(id: string) {
+    setGalleryImages((prev) => prev.filter((g) => g.id !== id));
+  }
+
   async function handleAvatarFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     e.target.value = "";
@@ -385,15 +425,22 @@ export function DashboardEditor({
         media_kit_heading: mediaKitHeading,
         rate_card: rateCard,
         past_collabs: pastCollabs,
-        links: links.map(({ type, label, sub_label, icon, url, sub_links, is_featured }) => ({
-          type,
-          label,
-          sub_label,
-          icon,
-          url,
-          sub_links,
-          is_featured,
-        })),
+        gallery_enabled: galleryEnabled,
+        gallery_heading: galleryHeading,
+        gallery_images: galleryImages,
+        links: links.map(
+          ({ type, label, sub_label, icon, url, sub_links, is_featured, starts_at, ends_at }) => ({
+            type,
+            label,
+            sub_label,
+            icon,
+            url,
+            sub_links,
+            is_featured,
+            starts_at,
+            ends_at,
+          }),
+        ),
       });
       if (result.ok) {
         setFeedback({ kind: "ok", text: "Saved." });
@@ -615,6 +662,84 @@ export function DashboardEditor({
               />
             </Field>
           </div>
+
+          <div className="mt-5 border-t border-neutral-200 pt-4 dark:border-white/10">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-neutral-900 dark:text-white">
+                Photo gallery{" "}
+                <span className={`font-normal ${faintTextClass}`}>
+                  ({galleryImages.length}/{MAX_GALLERY_IMAGES})
+                </span>
+              </h3>
+              <button
+                onClick={() => setGalleryEnabled((v) => !v)}
+                className={`relative h-7 w-12 rounded-full transition ${
+                  galleryEnabled ? "bg-violet-500" : "bg-neutral-300 dark:bg-white/10"
+                }`}
+                aria-label="Toggle photo gallery"
+              >
+                <span
+                  className={`absolute top-1 h-5 w-5 rounded-full bg-white transition ${
+                    galleryEnabled ? "left-6" : "left-1"
+                  }`}
+                />
+              </button>
+            </div>
+            <p className={`mt-1 text-xs ${mutedTextClass}`}>
+              An Instagram-style photo grid shown right below your bio.
+            </p>
+
+            {galleryEnabled && (
+              <div className="mt-3">
+                <Field label="Heading">
+                  <input
+                    value={galleryHeading}
+                    onChange={(e) => setGalleryHeading(e.target.value)}
+                    className={inputClass}
+                    placeholder="My work"
+                  />
+                </Field>
+                <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-5">
+                  {galleryImages.map((img) => (
+                    <div key={img.id} className="relative">
+                      <div className="aspect-square overflow-hidden rounded-lg bg-neutral-100 dark:bg-white/10">
+                        {img.url ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={img.url} alt="" className="h-full w-full object-cover" />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center">
+                            <ImageIcon className={`h-5 w-5 ${faintTextClass}`} />
+                          </div>
+                        )}
+                      </div>
+                      <input
+                        value={img.url}
+                        onChange={(e) => updateGalleryImage(img.id, e.target.value)}
+                        placeholder="Image URL"
+                        className={`${compactInputClass} mt-1 w-full`}
+                      />
+                      <button
+                        onClick={() => removeGalleryImage(img.id)}
+                        aria-label="Remove image"
+                        className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white shadow"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                  {galleryImages.length < MAX_GALLERY_IMAGES && (
+                    <button
+                      onClick={addGalleryImage}
+                      className="flex aspect-square flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-neutral-300 text-neutral-400 transition hover:border-neutral-400 hover:text-neutral-500 dark:border-white/15 dark:text-neutral-500 dark:hover:border-white/25"
+                    >
+                      <Plus className="h-5 w-5" />
+                      <span className="text-[10px] font-medium">Add photo</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
         </section>
         )}
 
@@ -783,6 +908,43 @@ export function DashboardEditor({
                     placeholder="https://… (its logo auto-fills the icon above)"
                     className={`${compactInputClass} sm:col-span-2`}
                   />
+                </div>
+
+                {/* scheduling */}
+                <div className="mt-3 border-t border-dashed border-neutral-200 pt-3 dark:border-white/10">
+                  <span className={`mb-1.5 flex items-center gap-1 text-xs font-medium ${mutedTextClass}`}>
+                    Schedule (optional)
+                  </span>
+                  <p className={`mb-2 text-xs ${faintTextClass}`}>
+                    Set an end time to show a live countdown and auto-hide the link after — great
+                    for sales, drops, or event links.
+                  </p>
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                    <label className="block">
+                      <span className={`mb-1 block text-[11px] ${faintTextClass}`}>Visible from</span>
+                      <input
+                        type="datetime-local"
+                        value={toDatetimeLocal(link.starts_at)}
+                        onChange={(e) =>
+                          updateLink(link.tempId, { starts_at: fromDatetimeLocal(e.target.value) })
+                        }
+                        className={`w-full ${compactInputClass}`}
+                      />
+                    </label>
+                    <label className="block">
+                      <span className={`mb-1 block text-[11px] ${faintTextClass}`}>
+                        Ends (countdown shown until then)
+                      </span>
+                      <input
+                        type="datetime-local"
+                        value={toDatetimeLocal(link.ends_at)}
+                        onChange={(e) =>
+                          updateLink(link.tempId, { ends_at: fromDatetimeLocal(e.target.value) })
+                        }
+                        className={`w-full ${compactInputClass}`}
+                      />
+                    </label>
+                  </div>
                 </div>
 
                 {/* sub-links */}
@@ -1247,6 +1409,7 @@ export function DashboardEditor({
             bioLine={bioLine}
             links={previewLinks}
             showBranding={creator.plan === "free"}
+            plan={creator.plan}
             template={template}
             accentColor={accentColor}
             mode="preview"
@@ -1261,6 +1424,11 @@ export function DashboardEditor({
               heading: mediaKitHeading,
               rateCard,
               pastCollabs,
+            }}
+            gallery={{
+              enabled: galleryEnabled,
+              heading: galleryHeading,
+              images: galleryImages,
             }}
           />
         </PhoneFrame>

@@ -124,6 +124,13 @@ export interface PastCollab {
 export const MAX_RATE_CARD_ITEMS = 4;
 export const MAX_PAST_COLLABS = 6;
 
+export interface GalleryImage {
+  id: string;
+  url: string;
+}
+
+export const MAX_GALLERY_IMAGES = 9;
+
 export interface Creator {
   id: string;
   user_id: string;
@@ -144,6 +151,9 @@ export interface Creator {
   media_kit_heading: string;
   rate_card: RateCardItem[];
   past_collabs: PastCollab[];
+  gallery_enabled: boolean;
+  gallery_heading: string;
+  gallery_images: GalleryImage[];
   created_at: string;
   updated_at: string;
 }
@@ -184,6 +194,8 @@ export interface LinkBlock {
   sub_links: SubLink[];
   sort_order: number;
   is_featured: boolean;
+  starts_at: string | null;
+  ends_at: string | null;
   created_at: string;
 }
 

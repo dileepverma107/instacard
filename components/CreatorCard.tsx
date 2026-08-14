@@ -1,10 +1,21 @@
-import { ChevronLeft, MoreHorizontal } from "lucide-react";
+import Link from "next/link";
+import { ChevronLeft, MoreHorizontal, Crown } from "lucide-react";
 import { LinkItem } from "./LinkItem";
 import { LeadCaptureForm } from "./LeadCaptureForm";
 import { MediaKitBlock } from "./MediaKitBlock";
+import { GalleryBlock } from "./GalleryBlock";
 import { formatCount } from "@/lib/format";
 import { THEME } from "@/lib/templateTheme";
-import { ACCENT_PRESETS, type Accent, type LinkBlock, type PastCollab, type RateCardItem, type Template } from "@/lib/types";
+import {
+  ACCENT_PRESETS,
+  type Accent,
+  type GalleryImage,
+  type LinkBlock,
+  type PastCollab,
+  type Plan,
+  type RateCardItem,
+  type Template,
+} from "@/lib/types";
 
 export interface CreatorCardProps {
   name: string;
@@ -12,7 +23,11 @@ export interface CreatorCardProps {
   avatarUrl: string | null;
   followerCount: number;
   bioLine: string;
-  links: Pick<LinkBlock, "id" | "label" | "sub_label" | "icon" | "url" | "sub_links" | "is_featured">[];
+  plan?: Plan;
+  links: Pick<
+    LinkBlock,
+    "id" | "label" | "sub_label" | "icon" | "url" | "sub_links" | "is_featured" | "ends_at"
+  >[];
   showBranding: boolean;
   template?: Template;
   accentColor?: Accent;
@@ -23,6 +38,7 @@ export interface CreatorCardProps {
   creatorId?: string;
   leadCapture?: { enabled: boolean; heading: string; buttonText: string };
   mediaKit?: { enabled: boolean; heading: string; rateCard: RateCardItem[]; pastCollabs: PastCollab[] };
+  gallery?: { enabled: boolean; heading: string; images: GalleryImage[] };
 }
 
 export function CreatorCard({
@@ -31,6 +47,7 @@ export function CreatorCard({
   avatarUrl,
   followerCount,
   bioLine,
+  plan,
   links,
   showBranding,
   template = "aurora",
@@ -40,6 +57,7 @@ export function CreatorCard({
   creatorId,
   leadCapture,
   mediaKit,
+  gallery,
 }: CreatorCardProps) {
   const t = THEME[template];
   const animated = mode === "live";
@@ -52,6 +70,10 @@ export function CreatorCard({
       ? { className: "animate-card-in", style: { animationDelay: `${delayMs}ms` } }
       : { className: "" };
   }
+
+  const galleryDelay = 60;
+  const linksStartDelay = galleryDelay + (gallery?.enabled ? 60 : 0);
+  const afterLinksDelay = linksStartDelay + links.length * 60;
 
   return (
     <div className={`flex h-full w-full flex-col ${t.page}`}>
@@ -87,7 +109,12 @@ export function CreatorCard({
             </div>
           </div>
 
-          <h1 className={`mt-3 text-base font-semibold ${t.name}`}>{name || "Your name"}</h1>
+          <h1 className={`mt-3 flex items-center gap-1 text-base font-semibold ${t.name}`}>
+            {name || "Your name"}
+            {plan === "premium" && (
+              <Crown className="h-3.5 w-3.5 text-amber-400" fill="currentColor" aria-label="InstaCard Pro" />
+            )}
+          </h1>
 
           <div className="mt-2 flex items-center gap-4 text-sm">
             <div className="text-center">
@@ -106,6 +133,19 @@ export function CreatorCard({
           )}
         </div>
 
+        {gallery?.enabled && gallery.images.length > 0 && (
+          <div className="mt-5">
+            <GalleryBlock
+              heading={gallery.heading}
+              images={gallery.images}
+              theme={t}
+              mode={mode}
+              animClassName={enter(galleryDelay).className}
+              animStyle={enter(galleryDelay).style}
+            />
+          </div>
+        )}
+
         {/* link blocks */}
         <div className="mt-6 space-y-2.5">
           {links.length === 0 && (
@@ -116,7 +156,7 @@ export function CreatorCard({
             </div>
           )}
           {links.map((link, i) => {
-            const { className: animClassName, style: animStyle } = enter(120 + i * 60);
+            const { className: animClassName, style: animStyle } = enter(linksStartDelay + i * 60);
             return (
               <LinkItem
                 key={link.id}
@@ -142,8 +182,8 @@ export function CreatorCard({
               theme={t}
               mode={mode}
               accentGradient={accentGradient}
-              animClassName={enter(120 + links.length * 60).className}
-              animStyle={enter(120 + links.length * 60).style}
+              animClassName={enter(afterLinksDelay).className}
+              animStyle={enter(afterLinksDelay).style}
             />
           </div>
         )}
@@ -157,8 +197,8 @@ export function CreatorCard({
               theme={t}
               mode={mode}
               accentGradient={accentGradient}
-              animClassName={enter(120 + links.length * 60 + (mediaKit?.enabled ? 60 : 0)).className}
-              animStyle={enter(120 + links.length * 60 + (mediaKit?.enabled ? 60 : 0)).style}
+              animClassName={enter(afterLinksDelay + (mediaKit?.enabled ? 60 : 0)).className}
+              animStyle={enter(afterLinksDelay + (mediaKit?.enabled ? 60 : 0)).style}
             />
           </div>
         )}
@@ -166,7 +206,14 @@ export function CreatorCard({
 
       {showBranding && (
         <div className={`border-t py-3 text-center text-xs ${t.footerBorder} ${t.footerText}`}>
-          Made with <span className={`font-semibold ${t.footerBrand}`}>InstaCard</span>
+          Made with{" "}
+          {mode === "live" ? (
+            <Link href="/" className={`font-semibold hover:underline ${t.footerBrand}`}>
+              InstaCard
+            </Link>
+          ) : (
+            <span className={`font-semibold ${t.footerBrand}`}>InstaCard</span>
+          )}
         </div>
       )}
     </div>

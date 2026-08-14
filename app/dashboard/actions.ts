@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import {
   ACCENT_PRESETS,
   CREATOR_TYPES,
+  MAX_GALLERY_IMAGES,
   MAX_LINKS,
   MAX_PAST_COLLABS,
   MAX_RATE_CARD_ITEMS,
@@ -13,6 +14,7 @@ import {
   TEMPLATES,
   type Accent,
   type CreatorType,
+  type GalleryImage,
   type LinkType,
   type PastCollab,
   type RateCardItem,
@@ -31,6 +33,8 @@ export interface SaveLinkInput {
   url: string;
   sub_links: SubLink[];
   is_featured: boolean;
+  starts_at: string | null;
+  ends_at: string | null;
 }
 
 export interface SaveCardInput {
@@ -50,6 +54,9 @@ export interface SaveCardInput {
   media_kit_heading: string;
   rate_card: RateCardItem[];
   past_collabs: PastCollab[];
+  gallery_enabled: boolean;
+  gallery_heading: string;
+  gallery_images: GalleryImage[];
   links: SaveLinkInput[];
 }
 
@@ -90,6 +97,9 @@ export async function saveCard(input: SaveCardInput): Promise<SaveCardResult> {
   if (input.past_collabs.length > MAX_PAST_COLLABS) {
     return { ok: false, error: `You can list up to ${MAX_PAST_COLLABS} past collabs.` };
   }
+  if (input.gallery_images.length > MAX_GALLERY_IMAGES) {
+    return { ok: false, error: `Gallery supports up to ${MAX_GALLERY_IMAGES} images.` };
+  }
 
   const { data: creator, error: creatorError } = await supabase
     .from("creators")
@@ -114,6 +124,9 @@ export async function saveCard(input: SaveCardInput): Promise<SaveCardResult> {
       past_collabs: input.past_collabs
         .filter((c) => c.name.trim())
         .map((c) => ({ id: c.id, name: c.name.trim(), logo_url: c.logo_url.trim() })),
+      gallery_enabled: input.gallery_enabled,
+      gallery_heading: input.gallery_heading.trim() || "My work",
+      gallery_images: input.gallery_images.filter((g) => g.url.trim()),
     })
     .eq("user_id", user.id)
     .select("id")
@@ -144,6 +157,8 @@ export async function saveCard(input: SaveCardInput): Promise<SaveCardResult> {
         .map((s) => ({ id: s.id, label: s.label.trim(), url: s.url.trim() })),
       sort_order: i,
       is_featured: link.is_featured,
+      starts_at: link.starts_at,
+      ends_at: link.ends_at,
     }));
     const { error: insertError } = await supabase.from("links").insert(rows);
     if (insertError) return { ok: false, error: insertError.message };

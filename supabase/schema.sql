@@ -32,6 +32,9 @@ create table if not exists creators (
   media_kit_heading text not null default 'Work with me',
   rate_card         jsonb not null default '[]'::jsonb,
   past_collabs      jsonb not null default '[]'::jsonb,
+  gallery_enabled   boolean not null default false,
+  gallery_heading   text not null default 'My work',
+  gallery_images    jsonb not null default '[]'::jsonb,
   created_at      timestamptz not null default now(),
   updated_at      timestamptz not null default now()
 );
@@ -53,6 +56,8 @@ create table if not exists links (
   sub_links    jsonb not null default '[]'::jsonb,
   sort_order   int not null default 0,
   is_featured  boolean not null default false,
+  starts_at    timestamptz,
+  ends_at      timestamptz,
   created_at   timestamptz not null default now()
 );
 

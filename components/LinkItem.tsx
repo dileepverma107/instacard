@@ -3,11 +3,15 @@
 import { useState } from "react";
 import { ChevronRight, ChevronDown, ArrowUpRight, Star } from "lucide-react";
 import { LinkIconBadge } from "./LinkIconBadge";
+import { CountdownBadge } from "./CountdownBadge";
 import type { LinkBlock } from "@/lib/types";
 import type { TemplateTheme } from "@/lib/templateTheme";
 
 export interface LinkItemProps {
-  link: Pick<LinkBlock, "id" | "label" | "sub_label" | "icon" | "url" | "sub_links" | "is_featured">;
+  link: Pick<
+    LinkBlock,
+    "id" | "label" | "sub_label" | "icon" | "url" | "sub_links" | "is_featured" | "ends_at"
+  >;
   theme: TemplateTheme;
   mode: "live" | "preview";
   /** Base path for the click-tracking redirect route (e.g. "/r"). When set,
@@ -53,6 +57,9 @@ export function LinkItem({
         </span>
         {link.sub_label && (
           <span className={`block truncate text-xs ${t.linkSub}`}>{link.sub_label}</span>
+        )}
+        {link.ends_at && (
+          <CountdownBadge targetIso={link.ends_at} className={`text-[11px] ${t.linkSub}`} />
         )}
       </span>
       {hasSubLinks ? (
