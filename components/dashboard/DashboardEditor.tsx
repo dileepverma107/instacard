@@ -17,6 +17,8 @@ import {
   ChevronDown,
   Star,
   Sparkles,
+  Circle,
+  type LucideIcon,
 } from "lucide-react";
 import { PhoneFrame } from "@/components/PhoneFrame";
 import { CreatorCard } from "@/components/CreatorCard";
@@ -69,32 +71,34 @@ const cardClass =
 
 const ACCENTS = {
   violet: {
-    card: "border-l-4 border-l-violet-400 dark:border-l-violet-500",
     icon: "bg-violet-500/10 text-violet-600 dark:bg-violet-500/15 dark:text-violet-400",
   },
   pink: {
-    card: "border-l-4 border-l-pink-400 dark:border-l-pink-500",
     icon: "bg-pink-500/10 text-pink-600 dark:bg-pink-500/15 dark:text-pink-400",
   },
   amber: {
-    card: "border-l-4 border-l-amber-400 dark:border-l-amber-500",
     icon: "bg-amber-500/10 text-amber-600 dark:bg-amber-500/15 dark:text-amber-400",
   },
   emerald: {
-    card: "border-l-4 border-l-emerald-400 dark:border-l-emerald-500",
     icon: "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400",
   },
 } as const;
 
-function sectionCard(accent: keyof typeof ACCENTS) {
-  return `${cardClass} ${ACCENTS[accent].card}`;
-}
 function sectionIcon(accent: keyof typeof ACCENTS) {
   return `flex h-7 w-7 items-center justify-center rounded-lg ${ACCENTS[accent].icon}`;
 }
 function entrance(delayMs: number): { className: string; style: React.CSSProperties } {
   return { className: "animate-card-in", style: { animationDelay: `${delayMs}ms` } };
 }
+
+type Section = "profile" | "links" | "design" | "publish";
+
+const SECTIONS: { id: Section; label: string; icon: LucideIcon; accent: keyof typeof ACCENTS }[] = [
+  { id: "profile", label: "Profile", icon: User, accent: "violet" },
+  { id: "links", label: "Links", icon: Link2, accent: "pink" },
+  { id: "design", label: "Design", icon: Palette, accent: "amber" },
+  { id: "publish", label: "Publish", icon: Rocket, accent: "emerald" },
+];
 
 const inputClass =
   "w-full rounded-2xl border border-neutral-200 bg-white/80 px-3.5 py-2.5 text-sm text-neutral-900 placeholder-neutral-400 shadow-sm outline-none transition focus:border-pink-400 focus:bg-white focus:ring-4 focus:ring-pink-500/10 dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder-neutral-500 dark:focus:bg-white/10";
@@ -124,6 +128,8 @@ export function DashboardEditor({
   const [template, setTemplate] = useState<Template>(creator.template ?? "aurora");
   const [creatorType, setCreatorType] = useState<CreatorType>(creator.creator_type ?? "general");
   const [isPublished, setIsPublished] = useState(creator.is_published);
+  const [activeSection, setActiveSection] = useState<Section>("profile");
+  const [expandedLinks, setExpandedLinks] = useState<Set<string>>(new Set());
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -168,25 +174,35 @@ export function DashboardEditor({
 
   function addLink() {
     if (links.length >= MAX_LINKS) return;
-    setLinks((prev) => [...prev, emptyLink()]);
+    const link = emptyLink();
+    setLinks((prev) => [...prev, link]);
+    setExpandedLinks((prev) => new Set(prev).add(link.tempId));
   }
 
   function addPresetLink(preset: (typeof LINK_PRESETS)[CreatorType][number]) {
     if (links.length >= MAX_LINKS) return;
-    setLinks((prev) => [
-      ...prev,
-      {
-        ...emptyLink(),
-        label: preset.label,
-        sub_label: preset.sub_label,
-        icon: preset.icon,
-        type: preset.type,
-      },
-    ]);
+    const link: EditableLink = {
+      ...emptyLink(),
+      label: preset.label,
+      sub_label: preset.sub_label,
+      icon: preset.icon,
+      type: preset.type,
+    };
+    setLinks((prev) => [...prev, link]);
+    setExpandedLinks((prev) => new Set(prev).add(link.tempId));
   }
 
   function removeLink(tempId: string) {
     setLinks((prev) => prev.filter((l) => l.tempId !== tempId));
+  }
+
+  function toggleExpanded(tempId: string) {
+    setExpandedLinks((prev) => {
+      const next = new Set(prev);
+      if (next.has(tempId)) next.delete(tempId);
+      else next.add(tempId);
+      return next;
+    });
   }
 
   function toggleFeatured(tempId: string) {
@@ -329,10 +345,49 @@ export function DashboardEditor({
   );
 
   return (
-    <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_320px]">
-      <div className="space-y-6">
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]">
+      <div className="space-y-4">
+        {/* section tabs + publish status */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex gap-1 rounded-xl border border-white/60 bg-white/50 p-1 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-white/5">
+            {SECTIONS.map((s) => {
+              const Icon = s.icon;
+              const active = activeSection === s.id;
+              return (
+                <button
+                  key={s.id}
+                  type="button"
+                  onClick={() => setActiveSection(s.id)}
+                  className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition sm:px-3 sm:text-sm ${
+                    active
+                      ? ACCENTS[s.accent].icon
+                      : "text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200"
+                  }`}
+                >
+                  <Icon className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">{s.label}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          <div
+            className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium ${
+              isPublished
+                ? "border-emerald-300/60 bg-emerald-500/10 text-emerald-700 dark:border-emerald-500/30 dark:text-emerald-400"
+                : "border-neutral-200 bg-white/60 text-neutral-500 dark:border-white/10 dark:bg-white/5 dark:text-neutral-400"
+            }`}
+          >
+            <Circle
+              className={`h-2 w-2 ${isPublished ? "fill-emerald-500 text-emerald-500" : "fill-neutral-400 text-neutral-400"}`}
+            />
+            {isPublished ? "Live" : "Draft"}
+          </div>
+        </div>
+
         {/* profile */}
-        <section className={`${sectionCard("violet")} ${entrance(0).className}`} style={entrance(0).style}>
+        {activeSection === "profile" && (
+        <section className={`${cardClass} ${entrance(0).className}`} style={entrance(0).style}>
           <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-white">
             <span className={sectionIcon("violet")}>
               <User className="h-4 w-4" />
@@ -463,9 +518,11 @@ export function DashboardEditor({
             </Field>
           </div>
         </section>
+        )}
 
         {/* links */}
-        <section className={`${sectionCard("pink")} ${entrance(60).className}`} style={entrance(60).style}>
+        {activeSection === "links" && (
+        <section className={`${cardClass} ${entrance(0).className}`} style={entrance(0).style}>
           <div className="mb-4 flex items-center justify-between">
             <h2 className="flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-white">
               <span className={sectionIcon("pink")}>
@@ -506,48 +563,44 @@ export function DashboardEditor({
             </div>
           )}
 
-          <div className="space-y-3">
-            {links.map((link, i) => (
+          <div className="space-y-2">
+            {links.map((link, i) => {
+              const isOpen = expandedLinks.has(link.tempId);
+              return (
               <div
                 key={link.tempId}
-                className={`rounded-2xl border bg-white/60 p-4 shadow-sm dark:bg-white/[0.03] ${
+                className={`rounded-2xl border bg-white/60 shadow-sm dark:bg-white/[0.03] ${
                   link.is_featured
                     ? "border-amber-300 ring-1 ring-amber-300/50 dark:border-amber-500/40 dark:ring-amber-500/20"
                     : "border-neutral-200 dark:border-white/10"
                 }`}
               >
-                <div className="mb-3 flex items-center gap-2">
-                  <LinkIconBadge
-                    url={link.url}
-                    icon={link.icon}
-                    fallbackWrapClass={linkIconBadgeFallback.wrap}
-                    fallbackIconClass={linkIconBadgeFallback.icon}
-                    className="h-8 w-8"
-                  />
-                  <select
-                    value={link.type}
-                    onChange={(e) => updateLink(link.tempId, { type: e.target.value as LinkType })}
-                    className={selectClass}
+                <div className="flex items-center gap-2 p-3">
+                  <button
+                    type="button"
+                    onClick={() => toggleExpanded(link.tempId)}
+                    className="flex min-w-0 flex-1 items-center gap-2.5 text-left"
                   >
-                    {LINK_TYPES.map((t) => (
-                      <option key={t} value={t}>
-                        {t}
-                      </option>
-                    ))}
-                  </select>
-                  <select
-                    value={link.icon}
-                    onChange={(e) => updateLink(link.tempId, { icon: e.target.value })}
-                    title="Fallback icon, used if a brand logo can't be found for the URL"
-                    className={selectClass}
-                  >
-                    {LINK_ICONS.map((icon) => (
-                      <option key={icon} value={icon}>
-                        {icon}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="ml-auto flex items-center gap-1">
+                    <ChevronDown
+                      className={`h-4 w-4 shrink-0 transition-transform ${isOpen ? "" : "-rotate-90"} ${faintTextClass}`}
+                    />
+                    <LinkIconBadge
+                      url={link.url}
+                      icon={link.icon}
+                      fallbackWrapClass={linkIconBadgeFallback.wrap}
+                      fallbackIconClass={linkIconBadgeFallback.icon}
+                      className="h-8 w-8"
+                    />
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-sm font-medium text-neutral-900 dark:text-white">
+                        {link.label || "Untitled link"}
+                      </span>
+                      <span className={`block truncate text-xs ${faintTextClass}`}>
+                        {link.url || "No URL yet"}
+                      </span>
+                    </span>
+                  </button>
+                  <div className="flex shrink-0 items-center gap-1">
                     <button
                       onClick={() => toggleFeatured(link.tempId)}
                       className={`rounded-md p-1 transition ${
@@ -584,6 +637,34 @@ export function DashboardEditor({
                       <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
+                </div>
+
+                {isOpen && (
+                <div className="border-t border-neutral-200 px-3 pb-3 pt-3 dark:border-white/10">
+                <div className="mb-2 flex items-center gap-2">
+                  <select
+                    value={link.type}
+                    onChange={(e) => updateLink(link.tempId, { type: e.target.value as LinkType })}
+                    className={selectClass}
+                  >
+                    {LINK_TYPES.map((t) => (
+                      <option key={t} value={t}>
+                        {t}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    value={link.icon}
+                    onChange={(e) => updateLink(link.tempId, { icon: e.target.value })}
+                    title="Fallback icon, used if a brand logo can't be found for the URL"
+                    className={selectClass}
+                  >
+                    {LINK_ICONS.map((icon) => (
+                      <option key={icon} value={icon}>
+                        {icon}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                   <input
@@ -665,19 +746,21 @@ export function DashboardEditor({
                     ))}
                   </div>
                 </div>
+                </div>
+                )}
               </div>
-            ))}
+              );
+            })}
             {links.length === 0 && (
               <p className={`text-sm ${faintTextClass}`}>No links yet — add up to {MAX_LINKS}.</p>
             )}
           </div>
         </section>
+        )}
 
         {/* template */}
-        <section
-          className={`${sectionCard("amber")} ${entrance(120).className}`}
-          style={entrance(120).style}
-        >
+        {activeSection === "design" && (
+        <section className={`${cardClass} ${entrance(0).className}`} style={entrance(0).style}>
           <h2 className="mb-1 flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-white">
             <span className={sectionIcon("amber")}>
               <Palette className="h-4 w-4" />
@@ -715,12 +798,11 @@ export function DashboardEditor({
             ))}
           </div>
         </section>
+        )}
 
         {/* publish */}
-        <section
-          className={`${sectionCard("emerald")} ${entrance(180).className}`}
-          style={entrance(180).style}
-        >
+        {activeSection === "publish" && (
+        <section className={`${cardClass} ${entrance(0).className}`} style={entrance(0).style}>
           <div className="flex items-center justify-between">
             <div>
               <h2 className="flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-white">
@@ -767,11 +849,10 @@ export function DashboardEditor({
             </button>
           </div>
         </section>
+        )}
 
-        <div
-          className={`flex items-center gap-3 ${entrance(240).className}`}
-          style={entrance(240).style}
-        >
+        {/* save — always visible regardless of active tab */}
+        <div className="flex items-center gap-3 border-t border-neutral-200/70 pt-4 dark:border-white/10">
           <button
             onClick={handleSave}
             disabled={pending}
@@ -794,10 +875,7 @@ export function DashboardEditor({
       </div>
 
       {/* live preview */}
-      <div
-        className={`lg:sticky lg:top-6 lg:h-fit ${entrance(100).className}`}
-        style={entrance(100).style}
-      >
+      <div className="lg:sticky lg:top-6 lg:h-fit">
         <p className={`mb-3 text-center text-xs font-medium uppercase tracking-wide ${faintTextClass}`}>
           Live preview
         </p>
