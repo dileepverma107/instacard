@@ -61,6 +61,69 @@ export const CREATOR_TYPES: CreatorTypeMeta[] = [
   { id: "photography_art", name: "Photography & Art", icon: "camera" },
 ];
 
+export type Accent = "sunset" | "ocean" | "berry" | "forest" | "gold" | "mono";
+
+export interface AccentMeta {
+  id: Accent;
+  name: string;
+  gradient: string;
+  swatch: string[];
+}
+
+export const ACCENT_PRESETS: AccentMeta[] = [
+  {
+    id: "sunset",
+    name: "Sunset",
+    gradient: "from-amber-400 via-pink-500 to-purple-600",
+    swatch: ["#f59e0b", "#ec4899", "#9333ea"],
+  },
+  {
+    id: "ocean",
+    name: "Ocean",
+    gradient: "from-sky-400 via-blue-500 to-indigo-600",
+    swatch: ["#38bdf8", "#3b82f6", "#4f46e5"],
+  },
+  {
+    id: "berry",
+    name: "Berry",
+    gradient: "from-rose-400 via-fuchsia-500 to-purple-600",
+    swatch: ["#fb7185", "#d946ef", "#9333ea"],
+  },
+  {
+    id: "forest",
+    name: "Forest",
+    gradient: "from-lime-400 via-emerald-500 to-teal-600",
+    swatch: ["#a3e635", "#10b981", "#0d9488"],
+  },
+  {
+    id: "gold",
+    name: "Gold",
+    gradient: "from-yellow-300 via-amber-500 to-orange-600",
+    swatch: ["#fde047", "#f59e0b", "#ea580c"],
+  },
+  {
+    id: "mono",
+    name: "Monochrome",
+    gradient: "from-neutral-400 via-neutral-600 to-neutral-900",
+    swatch: ["#a3a3a3", "#525252", "#171717"],
+  },
+];
+
+export interface RateCardItem {
+  id: string;
+  label: string;
+  price: string;
+}
+
+export interface PastCollab {
+  id: string;
+  name: string;
+  logo_url: string;
+}
+
+export const MAX_RATE_CARD_ITEMS = 4;
+export const MAX_PAST_COLLABS = 6;
+
 export interface Creator {
   id: string;
   user_id: string;
@@ -71,11 +134,16 @@ export interface Creator {
   bio_line: string;
   plan: Plan;
   template: Template;
+  accent_color: Accent;
   creator_type: CreatorType;
   is_published: boolean;
   lead_capture_enabled: boolean;
   lead_capture_heading: string;
   lead_capture_button_text: string;
+  media_kit_enabled: boolean;
+  media_kit_heading: string;
+  rate_card: RateCardItem[];
+  past_collabs: PastCollab[];
   created_at: string;
   updated_at: string;
 }
@@ -85,6 +153,17 @@ export interface Lead {
   creator_id: string;
   name: string | null;
   contact: string;
+  created_at: string;
+}
+
+export interface BrandInquiry {
+  id: string;
+  creator_id: string;
+  company: string;
+  contact_name: string | null;
+  email: string;
+  budget: string | null;
+  message: string | null;
   created_at: string;
 }
 

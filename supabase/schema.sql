@@ -16,6 +16,9 @@ create table if not exists creators (
   bio_line        text not null default '',
   plan            text not null default 'free' check (plan in ('free', 'premium')),
   template        text not null default 'aurora' check (template in ('aurora', 'paper', 'neon')),
+  accent_color    text not null default 'sunset' check (accent_color in (
+                    'sunset', 'ocean', 'berry', 'forest', 'gold', 'mono'
+                  )),
   creator_type    text not null default 'general' check (creator_type in (
                     'general', 'fashion_beauty', 'fitness_health', 'music_audio',
                     'education_coaching', 'business_local', 'gaming_streaming',
@@ -25,6 +28,10 @@ create table if not exists creators (
   lead_capture_enabled     boolean not null default false,
   lead_capture_heading     text not null default 'Get updates from me',
   lead_capture_button_text text not null default 'Subscribe',
+  media_kit_enabled boolean not null default false,
+  media_kit_heading text not null default 'Work with me',
+  rate_card         jsonb not null default '[]'::jsonb,
+  past_collabs      jsonb not null default '[]'::jsonb,
   created_at      timestamptz not null default now(),
   updated_at      timestamptz not null default now()
 );
@@ -95,6 +102,22 @@ create table if not exists leads (
 create index if not exists leads_creator_id_idx on leads (creator_id, created_at);
 
 -- ---------------------------------------------------------------------------
+-- brand_inquiries (media kit "work with me" form submissions)
+-- ---------------------------------------------------------------------------
+create table if not exists brand_inquiries (
+  id            uuid primary key default gen_random_uuid(),
+  creator_id    uuid not null references creators (id) on delete cascade,
+  company       text not null,
+  contact_name  text,
+  email         text not null,
+  budget        text,
+  message       text,
+  created_at    timestamptz not null default now()
+);
+
+create index if not exists brand_inquiries_creator_id_idx on brand_inquiries (creator_id, created_at);
+
+-- ---------------------------------------------------------------------------
 -- updated_at trigger for creators
 -- ---------------------------------------------------------------------------
 create or replace function set_updated_at()
@@ -118,6 +141,7 @@ alter table links enable row level security;
 alter table click_events enable row level security;
 alter table subscriptions enable row level security;
 alter table leads enable row level security;
+alter table brand_inquiries enable row level security;
 
 -- creators: owner has full access
 drop policy if exists "creators_owner_all" on creators;
@@ -191,6 +215,31 @@ drop policy if exists "leads_owner_delete" on leads;
 create policy "leads_owner_delete" on leads
   for delete using (
     exists (select 1 from creators c where c.id = leads.creator_id and c.user_id = auth.uid())
+  );
+
+-- brand_inquiries: anyone can submit against a creator who has media kit on
+drop policy if exists "brand_inquiries_public_insert" on brand_inquiries;
+create policy "brand_inquiries_public_insert" on brand_inquiries
+  for insert with check (
+    exists (
+      select 1 from creators c
+      where c.id = brand_inquiries.creator_id
+        and c.is_published = true
+        and c.media_kit_enabled = true
+    )
+  );
+
+-- brand_inquiries: only the owning creator can read or delete their inquiries
+drop policy if exists "brand_inquiries_owner_read" on brand_inquiries;
+create policy "brand_inquiries_owner_read" on brand_inquiries
+  for select using (
+    exists (select 1 from creators c where c.id = brand_inquiries.creator_id and c.user_id = auth.uid())
+  );
+
+drop policy if exists "brand_inquiries_owner_delete" on brand_inquiries;
+create policy "brand_inquiries_owner_delete" on brand_inquiries
+  for delete using (
+    exists (select 1 from creators c where c.id = brand_inquiries.creator_id and c.user_id = auth.uid())
   );
 
 -- ---------------------------------------------------------------------------

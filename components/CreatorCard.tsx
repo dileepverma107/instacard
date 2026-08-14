@@ -1,9 +1,10 @@
 import { ChevronLeft, MoreHorizontal } from "lucide-react";
 import { LinkItem } from "./LinkItem";
 import { LeadCaptureForm } from "./LeadCaptureForm";
+import { MediaKitBlock } from "./MediaKitBlock";
 import { formatCount } from "@/lib/format";
 import { THEME } from "@/lib/templateTheme";
-import type { LinkBlock, Template } from "@/lib/types";
+import { ACCENT_PRESETS, type Accent, type LinkBlock, type PastCollab, type RateCardItem, type Template } from "@/lib/types";
 
 export interface CreatorCardProps {
   name: string;
@@ -14,12 +15,14 @@ export interface CreatorCardProps {
   links: Pick<LinkBlock, "id" | "label" | "sub_label" | "icon" | "url" | "sub_links" | "is_featured">[];
   showBranding: boolean;
   template?: Template;
+  accentColor?: Accent;
   /** "live" renders real navigable anchors and plays the entrance animation (public page).
    *  "preview" renders inert, static blocks (dashboard live preview). */
   mode: "live" | "preview";
   linkHrefBase?: string;
   creatorId?: string;
   leadCapture?: { enabled: boolean; heading: string; buttonText: string };
+  mediaKit?: { enabled: boolean; heading: string; rateCard: RateCardItem[]; pastCollabs: PastCollab[] };
 }
 
 export function CreatorCard({
@@ -31,13 +34,18 @@ export function CreatorCard({
   links,
   showBranding,
   template = "aurora",
+  accentColor,
   mode,
   linkHrefBase,
   creatorId,
   leadCapture,
+  mediaKit,
 }: CreatorCardProps) {
   const t = THEME[template];
   const animated = mode === "live";
+  const accentGradient = `bg-gradient-to-tr ${
+    ACCENT_PRESETS.find((a) => a.id === accentColor)?.gradient ?? "from-amber-400 via-pink-500 to-purple-600"
+  }`;
 
   function enter(delayMs: number): { className: string; style?: React.CSSProperties } {
     return animated
@@ -116,12 +124,29 @@ export function CreatorCard({
                 theme={t}
                 mode={mode}
                 linkHrefBase={linkHrefBase}
+                accentGradient={accentGradient}
                 animClassName={animClassName}
                 animStyle={animStyle}
               />
             );
           })}
         </div>
+
+        {mediaKit?.enabled && (
+          <div className="mt-2.5">
+            <MediaKitBlock
+              creatorId={creatorId ?? ""}
+              heading={mediaKit.heading}
+              rateCard={mediaKit.rateCard}
+              pastCollabs={mediaKit.pastCollabs}
+              theme={t}
+              mode={mode}
+              accentGradient={accentGradient}
+              animClassName={enter(120 + links.length * 60).className}
+              animStyle={enter(120 + links.length * 60).style}
+            />
+          </div>
+        )}
 
         {leadCapture?.enabled && (
           <div className="mt-2.5">
@@ -131,8 +156,9 @@ export function CreatorCard({
               buttonText={leadCapture.buttonText}
               theme={t}
               mode={mode}
-              animClassName={enter(120 + links.length * 60).className}
-              animStyle={enter(120 + links.length * 60).style}
+              accentGradient={accentGradient}
+              animClassName={enter(120 + links.length * 60 + (mediaKit?.enabled ? 60 : 0)).className}
+              animStyle={enter(120 + links.length * 60 + (mediaKit?.enabled ? 60 : 0)).style}
             />
           </div>
         )}

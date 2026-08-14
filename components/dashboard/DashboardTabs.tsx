@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { Creator, Lead, LinkBlock } from "@/lib/types";
+import type { BrandInquiry, Creator, Lead, LinkBlock } from "@/lib/types";
 import { DashboardEditor } from "./DashboardEditor";
 import { AnalyticsPanel } from "./AnalyticsPanel";
 
@@ -11,12 +11,14 @@ export function DashboardTabs({
   clickCounts,
   totalClicks,
   leads,
+  brandInquiries,
 }: {
   creator: Creator;
   links: LinkBlock[];
   clickCounts: Record<string, number>;
   totalClicks: number;
   leads: Lead[];
+  brandInquiries: BrandInquiry[];
 }) {
   const [tab, setTab] = useState<"card" | "analytics">("card");
 
@@ -39,7 +41,12 @@ export function DashboardTabs({
       </div>
 
       {tab === "card" ? (
-        <DashboardEditor creator={creator} initialLinks={links} initialLeads={leads} />
+        <DashboardEditor
+          creator={creator}
+          initialLinks={links}
+          initialLeads={leads}
+          initialBrandInquiries={brandInquiries}
+        />
       ) : (
         <AnalyticsPanel links={links} clickCounts={clickCounts} totalClicks={totalClicks} />
       )}

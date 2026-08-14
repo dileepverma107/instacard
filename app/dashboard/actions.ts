@@ -4,12 +4,18 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import {
+  ACCENT_PRESETS,
   CREATOR_TYPES,
   MAX_LINKS,
+  MAX_PAST_COLLABS,
+  MAX_RATE_CARD_ITEMS,
   MAX_SUB_LINKS,
   TEMPLATES,
+  type Accent,
   type CreatorType,
   type LinkType,
+  type PastCollab,
+  type RateCardItem,
   type SubLink,
   type Template,
 } from "@/lib/types";
@@ -34,11 +40,16 @@ export interface SaveCardInput {
   follower_count: number;
   avatar_url: string;
   template: Template;
+  accent_color: Accent;
   creator_type: CreatorType;
   is_published: boolean;
   lead_capture_enabled: boolean;
   lead_capture_heading: string;
   lead_capture_button_text: string;
+  media_kit_enabled: boolean;
+  media_kit_heading: string;
+  rate_card: RateCardItem[];
+  past_collabs: PastCollab[];
   links: SaveLinkInput[];
 }
 
@@ -70,6 +81,15 @@ export async function saveCard(input: SaveCardInput): Promise<SaveCardResult> {
   if (!CREATOR_TYPES.some((t) => t.id === input.creator_type)) {
     return { ok: false, error: "Unknown creator type." };
   }
+  if (!ACCENT_PRESETS.some((a) => a.id === input.accent_color)) {
+    return { ok: false, error: "Unknown accent color." };
+  }
+  if (input.rate_card.length > MAX_RATE_CARD_ITEMS) {
+    return { ok: false, error: `Rate card supports up to ${MAX_RATE_CARD_ITEMS} items.` };
+  }
+  if (input.past_collabs.length > MAX_PAST_COLLABS) {
+    return { ok: false, error: `You can list up to ${MAX_PAST_COLLABS} past collabs.` };
+  }
 
   const { data: creator, error: creatorError } = await supabase
     .from("creators")
@@ -80,11 +100,20 @@ export async function saveCard(input: SaveCardInput): Promise<SaveCardResult> {
       follower_count: Math.max(0, Math.floor(input.follower_count) || 0),
       avatar_url: input.avatar_url.trim() || null,
       template: input.template,
+      accent_color: input.accent_color,
       creator_type: input.creator_type,
       is_published: input.is_published,
       lead_capture_enabled: input.lead_capture_enabled,
       lead_capture_heading: input.lead_capture_heading.trim() || "Get updates from me",
       lead_capture_button_text: input.lead_capture_button_text.trim() || "Subscribe",
+      media_kit_enabled: input.media_kit_enabled,
+      media_kit_heading: input.media_kit_heading.trim() || "Work with me",
+      rate_card: input.rate_card
+        .filter((r) => r.label.trim() || r.price.trim())
+        .map((r) => ({ id: r.id, label: r.label.trim(), price: r.price.trim() })),
+      past_collabs: input.past_collabs
+        .filter((c) => c.name.trim())
+        .map((c) => ({ id: c.id, name: c.name.trim(), logo_url: c.logo_url.trim() })),
     })
     .eq("user_id", user.id)
     .select("id")
@@ -128,6 +157,14 @@ export async function saveCard(input: SaveCardInput): Promise<SaveCardResult> {
 export async function deleteLead(leadId: string): Promise<SaveCardResult> {
   const supabase = await createClient();
   const { error } = await supabase.from("leads").delete().eq("id", leadId);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/dashboard");
+  return { ok: true };
+}
+
+export async function deleteBrandInquiry(inquiryId: string): Promise<SaveCardResult> {
+  const supabase = await createClient();
+  const { error } = await supabase.from("brand_inquiries").delete().eq("id", inquiryId);
   if (error) return { ok: false, error: error.message };
   revalidatePath("/dashboard");
   return { ok: true };

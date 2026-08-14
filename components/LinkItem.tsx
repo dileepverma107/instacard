@@ -13,15 +13,20 @@ export interface LinkItemProps {
   /** Base path for the click-tracking redirect route (e.g. "/r"). When set,
    *  hrefs go through `${linkHrefBase}/${link.id}` instead of the raw URL. */
   linkHrefBase?: string;
+  /** Full Tailwind gradient classes (e.g. "bg-gradient-to-tr from-amber-400 via-pink-500 to-purple-600"). */
+  accentGradient?: string;
   animClassName?: string;
   animStyle?: React.CSSProperties;
 }
+
+const DEFAULT_ACCENT_GRADIENT = "bg-gradient-to-tr from-amber-400 via-pink-500 to-purple-600";
 
 export function LinkItem({
   link,
   theme: t,
   mode,
   linkHrefBase,
+  accentGradient = DEFAULT_ACCENT_GRADIENT,
   animClassName,
   animStyle,
 }: LinkItemProps) {
@@ -75,15 +80,15 @@ export function LinkItem({
   return (
     <div className={`relative ${animClassName ?? ""}`} style={animStyle}>
       {link.is_featured ? (
-        <div className="rounded-[1.15rem] bg-gradient-to-tr from-amber-400 via-pink-500 to-purple-600 p-[2px]">
-          {mainRow}
-        </div>
+        <div className={`rounded-[1.15rem] p-[2px] ${accentGradient}`}>{mainRow}</div>
       ) : (
         mainRow
       )}
 
       {link.is_featured && (
-        <span className="absolute -top-2 right-3 z-10 flex items-center gap-1 rounded-full bg-gradient-to-tr from-amber-400 via-pink-500 to-purple-600 px-2 py-0.5 text-[10px] font-semibold text-white shadow">
+        <span
+          className={`absolute -top-2 right-3 z-10 flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold text-white shadow ${accentGradient}`}
+        >
           <Star className="h-2.5 w-2.5 fill-current" /> Featured
         </span>
       )}

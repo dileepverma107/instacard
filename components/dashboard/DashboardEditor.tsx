@@ -19,6 +19,8 @@ import {
   Circle,
   Camera,
   Mail,
+  Briefcase,
+  Image as ImageIcon,
   type LucideIcon,
 } from "lucide-react";
 import { PhoneFrame } from "@/components/PhoneFrame";
@@ -26,18 +28,27 @@ import { CreatorCard } from "@/components/CreatorCard";
 import { LinkIconBadge } from "@/components/LinkIconBadge";
 import { LinkIconGlyph } from "@/components/LinkIcon";
 import { LeadsPanel } from "./LeadsPanel";
+import { BrandInquiriesPanel } from "./BrandInquiriesPanel";
+import { QrCodeCard } from "./QrCodeCard";
 import { createClient } from "@/lib/supabase/client";
 import {
+  ACCENT_PRESETS,
   CREATOR_TYPES,
   LINK_ICONS,
   MAX_LINKS,
+  MAX_PAST_COLLABS,
+  MAX_RATE_CARD_ITEMS,
   MAX_SUB_LINKS,
   TEMPLATES,
+  type Accent,
+  type BrandInquiry,
   type Creator,
   type CreatorType,
   type Lead,
   type LinkBlock,
   type LinkType,
+  type PastCollab,
+  type RateCardItem,
   type SubLink,
   type Template,
 } from "@/lib/types";
@@ -69,6 +80,14 @@ function emptySubLink(): SubLink {
   return { id: crypto.randomUUID(), label: "", url: "" };
 }
 
+function emptyRateCardItem(): RateCardItem {
+  return { id: crypto.randomUUID(), label: "", price: "" };
+}
+
+function emptyPastCollab(): PastCollab {
+  return { id: crypto.randomUUID(), name: "", logo_url: "" };
+}
+
 const cardClass =
   "rounded-3xl border border-white/60 bg-white/70 p-6 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.04]";
 
@@ -88,6 +107,9 @@ const ACCENTS = {
   sky: {
     icon: "bg-sky-500/10 text-sky-600 dark:bg-sky-500/15 dark:text-sky-400",
   },
+  rose: {
+    icon: "bg-rose-500/10 text-rose-600 dark:bg-rose-500/15 dark:text-rose-400",
+  },
 } as const;
 
 function sectionIcon(accent: keyof typeof ACCENTS) {
@@ -97,13 +119,14 @@ function entrance(delayMs: number): { className: string; style: React.CSSPropert
   return { className: "animate-card-in", style: { animationDelay: `${delayMs}ms` } };
 }
 
-type Section = "profile" | "links" | "design" | "leads" | "publish";
+type Section = "profile" | "links" | "design" | "leads" | "mediaKit" | "publish";
 
 const SECTIONS: { id: Section; label: string; icon: LucideIcon; accent: keyof typeof ACCENTS }[] = [
   { id: "profile", label: "Profile", icon: User, accent: "violet" },
   { id: "links", label: "Links", icon: Link2, accent: "pink" },
   { id: "design", label: "Design", icon: Palette, accent: "amber" },
   { id: "leads", label: "Leads", icon: Mail, accent: "sky" },
+  { id: "mediaKit", label: "Media Kit", icon: Briefcase, accent: "rose" },
   { id: "publish", label: "Publish", icon: Rocket, accent: "emerald" },
 ];
 
@@ -124,10 +147,12 @@ export function DashboardEditor({
   creator,
   initialLinks,
   initialLeads,
+  initialBrandInquiries,
 }: {
   creator: Creator;
   initialLinks: LinkBlock[];
   initialLeads: Lead[];
+  initialBrandInquiries: BrandInquiry[];
 }) {
   const [handle, setHandle] = useState(creator.handle);
   const [name, setName] = useState(creator.name);
@@ -135,6 +160,7 @@ export function DashboardEditor({
   const [followerCount, setFollowerCount] = useState(creator.follower_count);
   const [avatarUrl, setAvatarUrl] = useState(creator.avatar_url ?? "");
   const [template, setTemplate] = useState<Template>(creator.template ?? "aurora");
+  const [accentColor, setAccentColor] = useState<Accent>(creator.accent_color ?? "sunset");
   const [creatorType, setCreatorType] = useState<CreatorType>(creator.creator_type ?? "general");
   const [isPublished, setIsPublished] = useState(creator.is_published);
   const [leadCaptureEnabled, setLeadCaptureEnabled] = useState(creator.lead_capture_enabled);
@@ -145,6 +171,11 @@ export function DashboardEditor({
     creator.lead_capture_button_text || "Subscribe",
   );
   const [leads, setLeads] = useState<Lead[]>(initialLeads);
+  const [mediaKitEnabled, setMediaKitEnabled] = useState(creator.media_kit_enabled);
+  const [mediaKitHeading, setMediaKitHeading] = useState(creator.media_kit_heading || "Work with me");
+  const [rateCard, setRateCard] = useState<RateCardItem[]>(creator.rate_card ?? []);
+  const [pastCollabs, setPastCollabs] = useState<PastCollab[]>(creator.past_collabs ?? []);
+  const [brandInquiries, setBrandInquiries] = useState<BrandInquiry[]>(initialBrandInquiries);
   const [activeSection, setActiveSection] = useState<Section>("profile");
   const [expandedLinks, setExpandedLinks] = useState<Set<string>>(new Set());
   const [uploading, setUploading] = useState(false);
@@ -275,6 +306,28 @@ export function DashboardEditor({
     );
   }
 
+  function addRateCardItem() {
+    if (rateCard.length >= MAX_RATE_CARD_ITEMS) return;
+    setRateCard((prev) => [...prev, emptyRateCardItem()]);
+  }
+  function updateRateCardItem(id: string, patch: Partial<RateCardItem>) {
+    setRateCard((prev) => prev.map((r) => (r.id === id ? { ...r, ...patch } : r)));
+  }
+  function removeRateCardItem(id: string) {
+    setRateCard((prev) => prev.filter((r) => r.id !== id));
+  }
+
+  function addPastCollab() {
+    if (pastCollabs.length >= MAX_PAST_COLLABS) return;
+    setPastCollabs((prev) => [...prev, emptyPastCollab()]);
+  }
+  function updatePastCollab(id: string, patch: Partial<PastCollab>) {
+    setPastCollabs((prev) => prev.map((c) => (c.id === id ? { ...c, ...patch } : c)));
+  }
+  function removePastCollab(id: string) {
+    setPastCollabs((prev) => prev.filter((c) => c.id !== id));
+  }
+
   async function handleAvatarFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     e.target.value = "";
@@ -322,11 +375,16 @@ export function DashboardEditor({
         follower_count: followerCount,
         avatar_url: avatarUrl,
         template,
+        accent_color: accentColor,
         creator_type: creatorType,
         is_published: isPublished,
         lead_capture_enabled: leadCaptureEnabled,
         lead_capture_heading: leadCaptureHeading,
         lead_capture_button_text: leadCaptureButtonText,
+        media_kit_enabled: mediaKitEnabled,
+        media_kit_heading: mediaKitHeading,
+        rate_card: rateCard,
+        past_collabs: pastCollabs,
         links: links.map(({ type, label, sub_label, icon, url, sub_links, is_featured }) => ({
           type,
           label,
@@ -837,6 +895,38 @@ export function DashboardEditor({
               </button>
             ))}
           </div>
+
+          <h3 className="mb-1 mt-6 text-sm font-semibold text-neutral-900 dark:text-white">
+            Accent color
+          </h3>
+          <p className={`mb-3 text-xs ${mutedTextClass}`}>
+            Used for your featured link, lead capture, and media kit buttons.
+          </p>
+          <div className="grid grid-cols-3 gap-3 sm:grid-cols-6">
+            {ACCENT_PRESETS.map((a) => (
+              <button
+                key={a.id}
+                type="button"
+                onClick={() => setAccentColor(a.id)}
+                title={a.name}
+                className={`flex flex-col items-center gap-1.5 rounded-xl border p-2 transition ${
+                  accentColor === a.id
+                    ? "border-pink-500 ring-2 ring-pink-500/20"
+                    : "border-neutral-200 hover:border-neutral-300 dark:border-white/10 dark:hover:border-white/20"
+                }`}
+              >
+                <span
+                  className="h-6 w-full rounded-md"
+                  style={{
+                    background: `linear-gradient(to top right, ${a.swatch.join(", ")})`,
+                  }}
+                />
+                <span className="text-[10px] font-medium text-neutral-600 dark:text-neutral-400">
+                  {a.name}
+                </span>
+              </button>
+            ))}
+          </div>
         </section>
         )}
 
@@ -902,6 +992,168 @@ export function DashboardEditor({
         </section>
         )}
 
+        {/* media kit */}
+        {activeSection === "mediaKit" && (
+        <section className={`${cardClass} ${entrance(0).className}`} style={entrance(0).style}>
+          <div className="flex items-center justify-between">
+            <h2 className="flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-white">
+              <span className={sectionIcon("rose")}>
+                <Briefcase className="h-4 w-4" />
+              </span>
+              Media kit
+            </h2>
+            <button
+              onClick={() => setMediaKitEnabled((v) => !v)}
+              className={`relative h-7 w-12 rounded-full transition ${
+                mediaKitEnabled ? "bg-rose-500" : "bg-neutral-300 dark:bg-white/10"
+              }`}
+              aria-label="Toggle media kit"
+            >
+              <span
+                className={`absolute top-1 h-5 w-5 rounded-full bg-white transition ${
+                  mediaKitEnabled ? "left-6" : "left-1"
+                }`}
+              />
+            </button>
+          </div>
+          <p className={`mt-1 text-xs ${mutedTextClass}`}>
+            Adds a rate card, past brand collabs, and a &quot;work with me&quot; inquiry form to your card —
+            gives brands a reason to actually reach out and pay you.
+          </p>
+
+          {mediaKitEnabled && (
+            <>
+              <div className="mt-4">
+                <Field label="Heading">
+                  <input
+                    value={mediaKitHeading}
+                    onChange={(e) => setMediaKitHeading(e.target.value)}
+                    className={inputClass}
+                    placeholder="Work with me"
+                  />
+                </Field>
+              </div>
+
+              <div className="mt-5 border-t border-neutral-200 pt-4 dark:border-white/10">
+                <div className="mb-2 flex items-center justify-between">
+                  <h3 className="text-sm font-semibold text-neutral-900 dark:text-white">
+                    Rate card{" "}
+                    <span className={`font-normal ${faintTextClass}`}>
+                      ({rateCard.length}/{MAX_RATE_CARD_ITEMS})
+                    </span>
+                  </h3>
+                  <button
+                    onClick={addRateCardItem}
+                    disabled={rateCard.length >= MAX_RATE_CARD_ITEMS}
+                    className="flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-rose-600 hover:bg-rose-50 disabled:opacity-40 dark:text-rose-400 dark:hover:bg-rose-500/10"
+                  >
+                    <Plus className="h-3 w-3" /> Add item
+                  </button>
+                </div>
+                <div className="space-y-2">
+                  {rateCard.map((item) => (
+                    <div key={item.id} className="flex items-center gap-2">
+                      <input
+                        value={item.label}
+                        onChange={(e) => updateRateCardItem(item.id, { label: e.target.value })}
+                        placeholder="e.g. Instagram Reel"
+                        className={`flex-1 ${compactInputClass}`}
+                      />
+                      <input
+                        value={item.price}
+                        onChange={(e) => updateRateCardItem(item.id, { price: e.target.value })}
+                        placeholder="₹15,000"
+                        className={`w-28 ${compactInputClass}`}
+                      />
+                      <button
+                        onClick={() => removeRateCardItem(item.id)}
+                        className="rounded-md p-1 text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10"
+                        aria-label="Remove rate card item"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                  {rateCard.length === 0 && (
+                    <p className={`text-sm ${faintTextClass}`}>No rate card items yet.</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="mt-5 border-t border-neutral-200 pt-4 dark:border-white/10">
+                <div className="mb-2 flex items-center justify-between">
+                  <h3 className="text-sm font-semibold text-neutral-900 dark:text-white">
+                    Past collabs{" "}
+                    <span className={`font-normal ${faintTextClass}`}>
+                      ({pastCollabs.length}/{MAX_PAST_COLLABS})
+                    </span>
+                  </h3>
+                  <button
+                    onClick={addPastCollab}
+                    disabled={pastCollabs.length >= MAX_PAST_COLLABS}
+                    className="flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-rose-600 hover:bg-rose-50 disabled:opacity-40 dark:text-rose-400 dark:hover:bg-rose-500/10"
+                  >
+                    <Plus className="h-3 w-3" /> Add brand
+                  </button>
+                </div>
+                <div className="space-y-2">
+                  {pastCollabs.map((collab) => (
+                    <div key={collab.id} className="flex items-center gap-2">
+                      <span
+                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${linkIconBadgeFallback.wrap}`}
+                      >
+                        {collab.logo_url ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={collab.logo_url}
+                            alt=""
+                            className="h-full w-full rounded-lg object-contain"
+                          />
+                        ) : (
+                          <ImageIcon className={`h-4 w-4 ${linkIconBadgeFallback.icon}`} />
+                        )}
+                      </span>
+                      <input
+                        value={collab.name}
+                        onChange={(e) => updatePastCollab(collab.id, { name: e.target.value })}
+                        placeholder="Brand name"
+                        className={`w-28 sm:w-32 ${compactInputClass}`}
+                      />
+                      <input
+                        value={collab.logo_url}
+                        onChange={(e) => updatePastCollab(collab.id, { logo_url: e.target.value })}
+                        placeholder="Logo URL (optional)"
+                        className={`min-w-0 flex-1 ${compactInputClass}`}
+                      />
+                      <button
+                        onClick={() => removePastCollab(collab.id)}
+                        className="rounded-md p-1 text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10"
+                        aria-label="Remove past collab"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                  {pastCollabs.length === 0 && (
+                    <p className={`text-sm ${faintTextClass}`}>No past collabs added yet.</p>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+
+          <div className="mt-5 border-t border-neutral-200 pt-4 dark:border-white/10">
+            <h3 className="text-sm font-semibold text-neutral-900 dark:text-white">
+              Brand inquiries
+            </h3>
+            <BrandInquiriesPanel
+              inquiries={brandInquiries}
+              onDeleted={(id) => setBrandInquiries((prev) => prev.filter((i) => i.id !== id))}
+            />
+          </div>
+        </section>
+        )}
+
         {/* publish */}
         {activeSection === "publish" && (
         <section className={`${cardClass} ${entrance(0).className}`} style={entrance(0).style}>
@@ -950,6 +1202,11 @@ export function DashboardEditor({
               />
             </button>
           </div>
+          {isPublished && (
+            <div className="mt-4">
+              <QrCodeCard url={publicPath} />
+            </div>
+          )}
         </section>
         )}
 
@@ -991,12 +1248,19 @@ export function DashboardEditor({
             links={previewLinks}
             showBranding={creator.plan === "free"}
             template={template}
+            accentColor={accentColor}
             mode="preview"
             creatorId={creator.id}
             leadCapture={{
               enabled: leadCaptureEnabled,
               heading: leadCaptureHeading,
               buttonText: leadCaptureButtonText,
+            }}
+            mediaKit={{
+              enabled: mediaKitEnabled,
+              heading: mediaKitHeading,
+              rateCard,
+              pastCollabs,
             }}
           />
         </PhoneFrame>

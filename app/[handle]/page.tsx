@@ -65,6 +65,7 @@ export default async function PublicCardPage({
           links={links}
           showBranding={creator.plan === "free"}
           template={creator.template}
+          accentColor={creator.accent_color}
           mode="live"
           linkHrefBase="/r"
           creatorId={creator.id}
@@ -72,6 +73,12 @@ export default async function PublicCardPage({
             enabled: creator.lead_capture_enabled,
             heading: creator.lead_capture_heading,
             buttonText: creator.lead_capture_button_text,
+          }}
+          mediaKit={{
+            enabled: creator.media_kit_enabled,
+            heading: creator.media_kit_heading,
+            rateCard: creator.rate_card,
+            pastCollabs: creator.past_collabs,
           }}
         />
       </div>

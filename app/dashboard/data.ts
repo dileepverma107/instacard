@@ -1,6 +1,6 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
-import type { Creator, Lead, LinkBlock } from "@/lib/types";
+import type { BrandInquiry, Creator, Lead, LinkBlock } from "@/lib/types";
 import { customAlphabet } from "nanoid";
 
 const suffix = customAlphabet("abcdefghijklmnopqrstuvwxyz0123456789", 5);
@@ -72,4 +72,15 @@ export async function getLeads(creatorId: string): Promise<Lead[]> {
     .order("created_at", { ascending: false });
 
   return (data as Lead[]) ?? [];
+}
+
+export async function getBrandInquiries(creatorId: string): Promise<BrandInquiry[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("brand_inquiries")
+    .select("*")
+    .eq("creator_id", creatorId)
+    .order("created_at", { ascending: false });
+
+  return (data as BrandInquiry[]) ?? [];
 }

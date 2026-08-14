@@ -11,9 +11,13 @@ export interface LeadCaptureFormProps {
   theme: TemplateTheme;
   /** "live" actually submits to the API; "preview" simulates success locally (dashboard preview). */
   mode: "live" | "preview";
+  /** Full Tailwind gradient classes (e.g. "bg-gradient-to-tr from-amber-400 via-pink-500 to-purple-600"). */
+  accentGradient?: string;
   animClassName?: string;
   animStyle?: React.CSSProperties;
 }
+
+const DEFAULT_ACCENT_GRADIENT = "bg-gradient-to-tr from-amber-400 via-pink-500 to-purple-600";
 
 export function LeadCaptureForm({
   creatorId,
@@ -21,6 +25,7 @@ export function LeadCaptureForm({
   buttonText,
   theme: t,
   mode,
+  accentGradient = DEFAULT_ACCENT_GRADIENT,
   animClassName,
   animStyle,
 }: LeadCaptureFormProps) {
@@ -90,7 +95,7 @@ export function LeadCaptureForm({
           <button
             type="submit"
             disabled={status === "submitting"}
-            className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-gradient-to-tr from-amber-400 via-pink-500 to-purple-600 px-3 py-2 text-sm font-semibold text-white transition disabled:opacity-60"
+            className={`flex w-full items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-sm font-semibold text-white transition disabled:opacity-60 ${accentGradient}`}
           >
             {status === "submitting" && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
             {buttonText || "Subscribe"}
