@@ -8,7 +8,6 @@ import {
   Plus,
   Copy,
   Check,
-  Upload,
   Loader2,
   User,
   Link2,
@@ -18,6 +17,7 @@ import {
   Star,
   Sparkles,
   Circle,
+  Camera,
   type LucideIcon,
 } from "lucide-react";
 import { PhoneFrame } from "@/components/PhoneFrame";
@@ -132,6 +132,7 @@ export function DashboardEditor({
   const [expandedLinks, setExpandedLinks] = useState<Set<string>>(new Set());
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [showAvatarUrlInput, setShowAvatarUrlInput] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [links, setLinks] = useState<EditableLink[]>(
     initialLinks.map((l) => ({
@@ -395,6 +396,70 @@ export function DashboardEditor({
             Profile
           </h2>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="flex flex-col items-center gap-2.5 rounded-2xl border border-dashed border-neutral-200 bg-white/40 p-5 dark:border-white/10 dark:bg-white/[0.02] sm:col-span-2">
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                  aria-label="Change photo"
+                  className="block h-24 w-24 overflow-hidden rounded-full bg-gradient-to-tr from-amber-400 via-pink-500 to-purple-600 p-[3px] disabled:opacity-80"
+                >
+                  <span className="flex h-full w-full items-center justify-center overflow-hidden rounded-full bg-white text-2xl font-semibold text-neutral-400 dark:bg-neutral-900 dark:text-neutral-500">
+                    {avatarUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
+                    ) : (
+                      (name || handle || "?").charAt(0).toUpperCase()
+                    )}
+                  </span>
+                </button>
+                {uploading && (
+                  <span className="absolute inset-[3px] flex items-center justify-center rounded-full bg-black/40">
+                    <Loader2 className="h-6 w-6 animate-spin text-white" />
+                  </span>
+                )}
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                  aria-label="Upload photo"
+                  title="Upload photo"
+                  className="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full bg-neutral-900 text-white ring-4 ring-white transition hover:bg-neutral-700 disabled:opacity-60 dark:bg-white dark:text-neutral-900 dark:ring-neutral-950"
+                >
+                  <Camera className="h-4 w-4" />
+                </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleAvatarFile}
+                  className="hidden"
+                />
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setShowAvatarUrlInput((v) => !v)}
+                className={`text-xs font-medium ${mutedTextClass} hover:underline`}
+              >
+                {showAvatarUrlInput ? "Hide URL field" : "or paste an image URL"}
+              </button>
+
+              {showAvatarUrlInput && (
+                <input
+                  value={avatarUrl}
+                  onChange={(e) => setAvatarUrl(e.target.value)}
+                  className={`${compactInputClass} w-full max-w-xs text-center`}
+                  placeholder="https://…"
+                  autoFocus
+                />
+              )}
+
+              {uploadError && (
+                <p className="text-xs text-red-500 dark:text-red-400">{uploadError}</p>
+              )}
+            </div>
             <Field label="Handle">
               <div className="flex items-center gap-1.5 rounded-2xl border border-neutral-200 bg-white/80 px-3.5 py-2.5 text-sm text-neutral-900 shadow-sm transition focus-within:border-pink-400 focus-within:bg-white focus-within:ring-4 focus-within:ring-pink-500/10 dark:border-white/10 dark:bg-white/5 dark:text-white dark:focus-within:bg-white/10">
                 <span className="text-neutral-400 dark:text-neutral-500">@</span>
@@ -459,51 +524,6 @@ export function DashboardEditor({
                     </span>
                   </button>
                 ))}
-              </div>
-            </Field>
-            <Field label="Profile photo" className="sm:col-span-2">
-              <div className="flex items-center gap-4">
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-tr from-amber-400 via-pink-500 to-purple-600 p-[2px]">
-                  <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full bg-white text-lg font-semibold text-neutral-400 dark:bg-neutral-900 dark:text-neutral-500">
-                    {avatarUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
-                    ) : (
-                      (name || handle || "?").charAt(0).toUpperCase()
-                    )}
-                  </div>
-                </div>
-                <div className="flex-1">
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleAvatarFile}
-                    className="hidden"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={uploading}
-                    className="flex items-center gap-1.5 rounded-lg border border-neutral-300 bg-white/80 px-3 py-1.5 text-xs font-medium text-neutral-700 shadow-sm transition hover:bg-white disabled:opacity-60 dark:border-white/10 dark:bg-white/5 dark:text-neutral-300 dark:hover:bg-white/10"
-                  >
-                    {uploading ? (
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    ) : (
-                      <Upload className="h-3.5 w-3.5" />
-                    )}
-                    {uploading ? "Uploading…" : "Upload photo"}
-                  </button>
-                  <input
-                    value={avatarUrl}
-                    onChange={(e) => setAvatarUrl(e.target.value)}
-                    className={`${compactInputClass} mt-2 w-full`}
-                    placeholder="…or paste an image URL"
-                  />
-                  {uploadError && (
-                    <p className="mt-1 text-xs text-red-500 dark:text-red-400">{uploadError}</p>
-                  )}
-                </div>
               </div>
             </Field>
             <Field label="Bio line" className="sm:col-span-2">
