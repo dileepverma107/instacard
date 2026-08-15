@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
 const MAX_LEN = 500;
+const MIN_FILL_MS = 1500;
 
 function isNonEmptyString(v: unknown): v is string {
   return typeof v === "string" && v.trim().length > 0;
@@ -15,10 +16,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "Invalid request." }, { status: 400 });
   }
 
-  const { creatorId, company, contactName, email, budget, message } = (body ?? {}) as Record<
-    string,
-    unknown
-  >;
+  const { creatorId, company, contactName, email, budget, message, website, renderedAt } =
+    (body ?? {}) as Record<string, unknown>;
 
   if (!isNonEmptyString(creatorId)) {
     return NextResponse.json({ ok: false, error: "Missing creator." }, { status: 400 });
@@ -32,6 +31,13 @@ export async function POST(request: Request) {
   const fields = [company, contactName, email, budget, message];
   if (fields.some((f) => typeof f === "string" && f.length > MAX_LEN)) {
     return NextResponse.json({ ok: false, error: "That's too long." }, { status: 400 });
+  }
+
+  // Honeypot filled, or submitted faster than a human could type: pretend it
+  // worked without touching the database.
+  const tooFast = typeof renderedAt !== "number" || Date.now() - renderedAt < MIN_FILL_MS;
+  if (isNonEmptyString(website) || tooFast) {
+    return NextResponse.json({ ok: true });
   }
 
   const supabase = await createClient();

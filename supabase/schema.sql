@@ -79,6 +79,19 @@ create index if not exists click_events_creator_id_idx on click_events (creator_
 create index if not exists click_events_link_id_idx on click_events (link_id);
 
 -- ---------------------------------------------------------------------------
+-- page_views (public card loads — pairs with click_events for click-through rate)
+-- ---------------------------------------------------------------------------
+create table if not exists page_views (
+  id          uuid primary key default gen_random_uuid(),
+  creator_id  uuid not null references creators (id) on delete cascade,
+  "timestamp" timestamptz not null default now(),
+  referrer    text,
+  user_agent  text
+);
+
+create index if not exists page_views_creator_id_idx on page_views (creator_id, "timestamp");
+
+-- ---------------------------------------------------------------------------
 -- subscriptions (premium tier, Phase 2)
 -- ---------------------------------------------------------------------------
 create table if not exists subscriptions (
@@ -147,6 +160,7 @@ alter table click_events enable row level security;
 alter table subscriptions enable row level security;
 alter table leads enable row level security;
 alter table brand_inquiries enable row level security;
+alter table page_views enable row level security;
 
 -- creators: owner has full access
 drop policy if exists "creators_owner_all" on creators;
@@ -186,6 +200,20 @@ drop policy if exists "click_events_owner_read" on click_events;
 create policy "click_events_owner_read" on click_events
   for select using (
     exists (select 1 from creators c where c.id = click_events.creator_id and c.user_id = auth.uid())
+  );
+
+-- page_views: anyone (including anon visitors) can insert a view against a published card
+drop policy if exists "page_views_public_insert" on page_views;
+create policy "page_views_public_insert" on page_views
+  for insert with check (
+    exists (select 1 from creators c where c.id = page_views.creator_id and c.is_published = true)
+  );
+
+-- page_views: only the owning creator can read their analytics
+drop policy if exists "page_views_owner_read" on page_views;
+create policy "page_views_owner_read" on page_views
+  for select using (
+    exists (select 1 from creators c where c.id = page_views.creator_id and c.user_id = auth.uid())
   );
 
 -- subscriptions: owner only

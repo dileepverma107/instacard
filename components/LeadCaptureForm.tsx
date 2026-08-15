@@ -31,8 +31,10 @@ export function LeadCaptureForm({
 }: LeadCaptureFormProps) {
   const [name, setName] = useState("");
   const [contact, setContact] = useState("");
+  const [company, setCompany] = useState(""); // honeypot — real users never see or fill this
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
+  const [renderedAt] = useState(() => Date.now());
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -43,13 +45,22 @@ export function LeadCaptureForm({
       return;
     }
 
+    // Bots that auto-fill every field, or submit faster than a human can, are
+    // shown a fake success without ever hitting the API.
+    if (company.trim() || Date.now() - renderedAt < 1500) {
+      setStatus("success");
+      setName("");
+      setContact("");
+      return;
+    }
+
     setStatus("submitting");
     setError(null);
     try {
       const res = await fetch("/api/leads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ creatorId, name, contact }),
+        body: JSON.stringify({ creatorId, name, contact, company, renderedAt }),
       });
       const data = await res.json();
       if (!res.ok || !data.ok) throw new Error(data.error || "Something went wrong.");
@@ -79,6 +90,14 @@ export function LeadCaptureForm({
             </span>
             <p className={`text-sm font-medium ${t.linkLabel}`}>{heading || "Get updates from me"}</p>
           </div>
+          <input
+            value={company}
+            onChange={(e) => setCompany(e.target.value)}
+            tabIndex={-1}
+            autoComplete="off"
+            aria-hidden="true"
+            className="absolute left-[-9999px] h-0 w-0 opacity-0"
+          />
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}

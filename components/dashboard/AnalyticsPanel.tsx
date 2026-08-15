@@ -9,11 +9,14 @@ export function AnalyticsPanel({
   links,
   clickCounts,
   totalClicks,
+  pageViews,
 }: {
   links: LinkBlock[];
   clickCounts: Record<string, number>;
   totalClicks: number;
+  pageViews: number;
 }) {
+  const ctr = pageViews > 0 ? (totalClicks / pageViews) * 100 : 0;
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
@@ -35,12 +38,24 @@ export function AnalyticsPanel({
 
   return (
     <div className="max-w-3xl animate-card-in">
-      <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-3">
+      <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <div className="rounded-2xl border border-white/60 bg-white/70 p-5 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.04]">
+          <div className="text-2xl font-semibold text-neutral-900 dark:text-white">
+            {pageViews}
+          </div>
+          <div className="text-sm text-neutral-500 dark:text-neutral-400">Page views</div>
+        </div>
         <div className="rounded-2xl border border-white/60 bg-white/70 p-5 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.04]">
           <div className="text-2xl font-semibold text-neutral-900 dark:text-white">
             {totalClicks}
           </div>
           <div className="text-sm text-neutral-500 dark:text-neutral-400">Total clicks</div>
+        </div>
+        <div className="rounded-2xl border border-white/60 bg-white/70 p-5 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.04]">
+          <div className="text-2xl font-semibold text-neutral-900 dark:text-white">
+            {ctr.toFixed(1)}%
+          </div>
+          <div className="text-sm text-neutral-500 dark:text-neutral-400">Click-through rate</div>
         </div>
         <div className="rounded-2xl border border-white/60 bg-white/70 p-5 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.04]">
           <div className="text-2xl font-semibold text-neutral-900 dark:text-white">

@@ -1,10 +1,12 @@
 import { notFound } from "next/navigation";
+import { headers } from "next/headers";
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
+import { isLikelyBot } from "@/lib/bot";
 import { CreatorCard } from "@/components/CreatorCard";
 import type { Creator, LinkBlock } from "@/lib/types";
 
-async function getPublishedCreator(rawHandle: string) {
+export async function getPublishedCreator(rawHandle: string) {
   const handle = rawHandle.replace(/^@/, "").toLowerCase();
   const supabase = await createClient();
 
@@ -36,9 +38,15 @@ export async function generateMetadata({
   if (!result) return { title: "InstaCard" };
 
   const { creator } = result;
+  const title = `${creator.name || `@${creator.handle}`} · InstaCard`;
+  const description =
+    creator.bio_line || `Check out ${creator.name || creator.handle} on InstaCard.`;
+
   return {
-    title: `${creator.name || `@${creator.handle}`} · InstaCard`,
-    description: creator.bio_line || `Check out ${creator.name || creator.handle} on InstaCard.`,
+    title,
+    description,
+    openGraph: { title, description, type: "profile" },
+    twitter: { card: "summary_large_image", title, description },
   };
 }
 
@@ -52,6 +60,17 @@ export default async function PublicCardPage({
   if (!result) notFound();
 
   const { creator, links: allLinks } = result;
+
+  const requestHeaders = await headers();
+  const userAgent = requestHeaders.get("user-agent");
+  if (!isLikelyBot(userAgent)) {
+    const supabase = await createClient();
+    await supabase.from("page_views").insert({
+      creator_id: creator.id,
+      referrer: requestHeaders.get("referer"),
+      user_agent: userAgent,
+    });
+  }
 
   // This is a per-request Server Component render (not a client re-render),
   // so reading the current time here to filter scheduled links is correct.

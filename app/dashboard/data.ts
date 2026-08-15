@@ -84,3 +84,13 @@ export async function getBrandInquiries(creatorId: string): Promise<BrandInquiry
 
   return (data as BrandInquiry[]) ?? [];
 }
+
+export async function getPageViewCount(creatorId: string): Promise<number> {
+  const supabase = await createClient();
+  const { count } = await supabase
+    .from("page_views")
+    .select("id", { count: "exact", head: true })
+    .eq("creator_id", creatorId);
+
+  return count ?? 0;
+}

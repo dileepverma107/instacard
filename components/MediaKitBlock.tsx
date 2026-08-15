@@ -36,8 +36,10 @@ export function MediaKitBlock({
   const [email, setEmail] = useState("");
   const [budget, setBudget] = useState("");
   const [message, setMessage] = useState("");
+  const [website, setWebsite] = useState(""); // honeypot — real users never see or fill this
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
+  const [renderedAt] = useState(() => Date.now());
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -48,13 +50,25 @@ export function MediaKitBlock({
       return;
     }
 
+    // Bots that auto-fill every field, or submit faster than a human can, are
+    // shown a fake success without ever hitting the API.
+    if (website.trim() || Date.now() - renderedAt < 1500) {
+      setStatus("success");
+      setCompany("");
+      setContactName("");
+      setEmail("");
+      setBudget("");
+      setMessage("");
+      return;
+    }
+
     setStatus("submitting");
     setError(null);
     try {
       const res = await fetch("/api/brand-inquiries", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ creatorId, company, contactName, email, budget, message }),
+        body: JSON.stringify({ creatorId, company, contactName, email, budget, message, website, renderedAt }),
       });
       const data = await res.json();
       if (!res.ok || !data.ok) throw new Error(data.error || "Something went wrong.");
@@ -125,6 +139,14 @@ export function MediaKitBlock({
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="mt-3 space-y-2">
+          <input
+            value={website}
+            onChange={(e) => setWebsite(e.target.value)}
+            tabIndex={-1}
+            autoComplete="off"
+            aria-hidden="true"
+            className="absolute left-[-9999px] h-0 w-0 opacity-0"
+          />
           <input
             value={company}
             onChange={(e) => setCompany(e.target.value)}

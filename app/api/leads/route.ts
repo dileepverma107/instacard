@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 
 const MAX_NAME_LEN = 100;
 const MAX_CONTACT_LEN = 200;
+const MIN_FILL_MS = 1500;
 
 export async function POST(request: Request) {
   let body: unknown;
@@ -12,7 +13,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "Invalid request." }, { status: 400 });
   }
 
-  const { creatorId, name, contact } = (body ?? {}) as Record<string, unknown>;
+  const { creatorId, name, contact, company, renderedAt } = (body ?? {}) as Record<string, unknown>;
 
   if (typeof creatorId !== "string" || !creatorId) {
     return NextResponse.json({ ok: false, error: "Missing creator." }, { status: 400 });
@@ -22,6 +23,13 @@ export async function POST(request: Request) {
   }
   if (contact.length > MAX_CONTACT_LEN || (typeof name === "string" && name.length > MAX_NAME_LEN)) {
     return NextResponse.json({ ok: false, error: "That's too long." }, { status: 400 });
+  }
+
+  // Honeypot filled, or submitted faster than a human could type: pretend it
+  // worked without touching the database.
+  const tooFast = typeof renderedAt !== "number" || Date.now() - renderedAt < MIN_FILL_MS;
+  if ((typeof company === "string" && company.trim()) || tooFast) {
+    return NextResponse.json({ ok: true });
   }
 
   const supabase = await createClient();

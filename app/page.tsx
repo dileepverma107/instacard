@@ -166,7 +166,15 @@ export default function LandingPage() {
       </section>
 
       <footer className="border-t border-white/10 py-10 text-center text-sm text-white/40">
-        © {new Date().getFullYear()} InstaCard. Not affiliated with Instagram or Meta.
+        <p>© {new Date().getFullYear()} InstaCard. Not affiliated with Instagram or Meta.</p>
+        <div className="mt-2 flex items-center justify-center gap-4">
+          <Link href="/privacy" className="hover:text-white/70">
+            Privacy
+          </Link>
+          <Link href="/terms" className="hover:text-white/70">
+            Terms
+          </Link>
+        </div>
       </footer>
     </main>
   );

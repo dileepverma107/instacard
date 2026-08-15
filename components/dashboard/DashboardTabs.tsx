@@ -12,6 +12,7 @@ export function DashboardTabs({
   totalClicks,
   leads,
   brandInquiries,
+  pageViews,
 }: {
   creator: Creator;
   links: LinkBlock[];
@@ -19,6 +20,7 @@ export function DashboardTabs({
   totalClicks: number;
   leads: Lead[];
   brandInquiries: BrandInquiry[];
+  pageViews: number;
 }) {
   const [tab, setTab] = useState<"card" | "analytics">("card");
 
@@ -48,7 +50,12 @@ export function DashboardTabs({
           initialBrandInquiries={brandInquiries}
         />
       ) : (
-        <AnalyticsPanel links={links} clickCounts={clickCounts} totalClicks={totalClicks} />
+        <AnalyticsPanel
+          links={links}
+          clickCounts={clickCounts}
+          totalClicks={totalClicks}
+          pageViews={pageViews}
+        />
       )}
     </div>
   );
