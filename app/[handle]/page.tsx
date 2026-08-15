@@ -41,11 +41,13 @@ export async function generateMetadata({
   const title = `${creator.name || `@${creator.handle}`} · InstaCard`;
   const description =
     creator.bio_line || `Check out ${creator.name || creator.handle} on InstaCard.`;
+  const url = `/${creator.handle}`;
 
   return {
     title,
     description,
-    openGraph: { title, description, type: "profile" },
+    alternates: { canonical: url },
+    openGraph: { title, description, type: "profile", url },
     twitter: { card: "summary_large_image", title, description },
   };
 }
@@ -82,8 +84,26 @@ export default async function PublicCardPage({
     return true;
   });
 
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "ProfilePage",
+    dateModified: creator.updated_at,
+    mainEntity: {
+      "@type": "Person",
+      name: creator.name || creator.handle,
+      alternateName: `@${creator.handle}`,
+      description: creator.bio_line || undefined,
+      image: creator.avatar_url || undefined,
+      url: `https://instacards.in/${creator.handle}`,
+    },
+  };
+
   return (
     <div className="h-dvh bg-neutral-950">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
       <div className="mx-auto h-dvh w-full max-w-md">
         <CreatorCard
           name={creator.name}

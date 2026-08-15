@@ -1,7 +1,12 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { Check, X } from "lucide-react";
 import { PhoneFrame } from "@/components/PhoneFrame";
 import { CreatorCard } from "@/components/CreatorCard";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
 const SAMPLE_LINKS = [
   {
@@ -46,9 +51,25 @@ const SAMPLE_LINKS = [
   },
 ];
 
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: "InstaCard",
+  applicationCategory: "BusinessApplication",
+  operatingSystem: "Web",
+  url: "https://instacards.in",
+  description:
+    "InstaCard is the link-in-bio page built for Instagram's in-app browser — an Instagram-native creator portfolio, not another generic link list.",
+  offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+};
+
 export default function LandingPage() {
   return (
     <main className="flex-1 bg-neutral-950 text-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
       <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
         <div className="flex items-center gap-2">
           <span className="h-7 w-7 rounded-lg bg-gradient-to-tr from-amber-400 via-pink-500 to-purple-600" />
