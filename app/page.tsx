@@ -3,6 +3,9 @@ import type { Metadata } from "next";
 import { Check, X } from "lucide-react";
 import { PhoneFrame } from "@/components/PhoneFrame";
 import { CreatorCard } from "@/components/CreatorCard";
+import { AdSense } from "@/components/AdSense";
+
+const ADSENSE_CLIENT_ID = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID;
 
 export const metadata: Metadata = {
   alternates: { canonical: "/" },
@@ -66,6 +69,7 @@ const structuredData = {
 export default function LandingPage() {
   return (
     <main className="flex-1 bg-neutral-950 text-white">
+      {ADSENSE_CLIENT_ID && <AdSense clientId={ADSENSE_CLIENT_ID} />}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}

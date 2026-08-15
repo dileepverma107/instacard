@@ -4,7 +4,10 @@ import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { isLikelyBot } from "@/lib/bot";
 import { CreatorCard } from "@/components/CreatorCard";
+import { AdSense } from "@/components/AdSense";
 import type { Creator, LinkBlock } from "@/lib/types";
+
+const ADSENSE_CLIENT_ID = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID;
 
 export async function getPublishedCreator(rawHandle: string) {
   const handle = rawHandle.replace(/^@/, "").toLowerCase();
@@ -100,6 +103,9 @@ export default async function PublicCardPage({
 
   return (
     <div className="h-dvh bg-neutral-950">
+      {ADSENSE_CLIENT_ID && creator.plan === "free" && (
+        <AdSense clientId={ADSENSE_CLIENT_ID} />
+      )}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
