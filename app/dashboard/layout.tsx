@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { signOutAction } from "./actions";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
@@ -15,7 +16,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <header className="sticky top-0 z-20 border-b border-white/60 bg-white/70 backdrop-blur-xl dark:border-white/10 dark:bg-neutral-950/70">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <Link href="/" className="flex items-center gap-2">
-            <span className="h-7 w-7 rounded-lg bg-gradient-to-tr from-amber-400 via-pink-500 to-purple-600" />
+            <Image src="/logo.png" alt="InstaCard" width={28} height={28} className="rounded-lg" />
             <span className="text-base font-semibold tracking-tight text-neutral-900 dark:text-white">
               InstaCard
             </span>

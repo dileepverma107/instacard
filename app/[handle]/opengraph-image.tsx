@@ -96,13 +96,13 @@ export default async function Image({ params }: { params: Promise<{ handle: stri
             color: "rgba(255,255,255,0.4)",
           }}
         >
-          <div
-            style={{
-              width: 28,
-              height: 28,
-              borderRadius: 8,
-              background: "linear-gradient(to top right, #f59e0b, #ec4899, #9333ea)",
-            }}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="https://instacards.in/logo.png"
+            width={28}
+            height={28}
+            style={{ borderRadius: 8 }}
+            alt=""
           />
           InstaCard
         </div>

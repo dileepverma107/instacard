@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -10,7 +11,7 @@ export default function PrivacyPage() {
     <main className="min-h-dvh bg-neutral-950 px-6 py-16 text-white">
       <div className="mx-auto max-w-2xl">
         <Link href="/" className="mb-10 flex items-center gap-2">
-          <span className="h-7 w-7 rounded-lg bg-gradient-to-tr from-amber-400 via-pink-500 to-purple-600" />
+          <Image src="/logo.png" alt="InstaCard" width={28} height={28} className="rounded-lg" />
           <span className="text-base font-semibold tracking-tight">InstaCard</span>
         </Link>
 

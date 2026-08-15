@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   sendMagicLink,
   signInWithPassword,
@@ -35,7 +36,7 @@ export default function LoginPage() {
     <main className="flex min-h-dvh items-center justify-center bg-neutral-950 px-6 py-16">
       <div className="w-full max-w-sm">
         <Link href="/" className="mb-10 flex items-center justify-center gap-2">
-          <span className="h-8 w-8 rounded-lg bg-gradient-to-tr from-amber-400 via-pink-500 to-purple-600" />
+          <Image src="/logo.png" alt="InstaCard" width={32} height={32} className="rounded-lg" />
           <span className="text-lg font-semibold tracking-tight text-white">InstaCard</span>
         </Link>
 
