@@ -14,6 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://instacards.in"),
   title: "InstaCard — the portfolio that feels like Instagram",
   description:
     "InstaCard is the link-in-bio page built for Instagram's in-app browser — an Instagram-native creator portfolio, not another generic link list.",
