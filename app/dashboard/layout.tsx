@@ -2,10 +2,14 @@ import Link from "next/link";
 import Image from "next/image";
 import { signOutAction } from "./actions";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { AdSense } from "@/components/AdSense";
+
+const ADSENSE_CLIENT_ID = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID;
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="relative min-h-dvh bg-neutral-50 dark:bg-neutral-950">
+      {ADSENSE_CLIENT_ID && <AdSense clientId={ADSENSE_CLIENT_ID} />}
       {/* Instagram-gradient ambient backdrop */}
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
         <div className="absolute -left-24 -top-24 h-[26rem] w-[26rem] rounded-full bg-purple-500/30 blur-[100px] dark:bg-purple-500/20" />
