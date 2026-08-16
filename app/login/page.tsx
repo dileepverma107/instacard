@@ -14,6 +14,9 @@ import {
 const initialMagicState: LoginState = { status: "idle" };
 const initialPasswordState: PasswordState = { status: "idle" };
 
+// Toggle to bring magic-link sign-in back — flip to true, no other changes needed.
+const MAGIC_LINK_ENABLED = false;
+
 export default function LoginPage() {
   const [mode, setMode] = useState<"password" | "magic">("password");
   const [passwordFlow, setPasswordFlow] = useState<"signin" | "signup">("signin");
@@ -41,21 +44,23 @@ export default function LoginPage() {
         </Link>
 
         <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-8">
-          <div className="mb-6 flex gap-1 rounded-xl bg-neutral-950 p-1">
-            {(["password", "magic"] as const).map((m) => (
-              <button
-                key={m}
-                onClick={() => setMode(m)}
-                className={`flex-1 rounded-lg py-1.5 text-sm font-medium transition ${
-                  mode === m ? "bg-neutral-800 text-white" : "text-neutral-500"
-                }`}
-              >
-                {m === "password" ? "Email & password" : "Magic link"}
-              </button>
-            ))}
-          </div>
+          {MAGIC_LINK_ENABLED && (
+            <div className="mb-6 flex gap-1 rounded-xl bg-neutral-950 p-1">
+              {(["password", "magic"] as const).map((m) => (
+                <button
+                  key={m}
+                  onClick={() => setMode(m)}
+                  className={`flex-1 rounded-lg py-1.5 text-sm font-medium transition ${
+                    mode === m ? "bg-neutral-800 text-white" : "text-neutral-500"
+                  }`}
+                >
+                  {m === "password" ? "Email & password" : "Magic link"}
+                </button>
+              ))}
+            </div>
+          )}
 
-          {mode === "password" ? (
+          {!MAGIC_LINK_ENABLED || mode === "password" ? (
             <>
               <h1 className="text-xl font-semibold text-white">
                 {passwordFlow === "signin" ? "Sign in" : "Create your account"}
