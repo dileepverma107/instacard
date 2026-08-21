@@ -6,7 +6,7 @@ import { FileDropzone } from "./FileDropzone";
 import { PdfPageGrid, type PdfPageGridMode } from "./PdfPageGrid";
 import { ToolWorkspace } from "./ToolWorkspace";
 import { renderPageThumbnails, type PageThumbnail } from "@/lib/pdf/render";
-import { rebuildFromPages, downloadBytes, type OrderedPage } from "@/lib/pdf/operations";
+import { rebuildFromPages, downloadBytes, formatFileSize, type OrderedPage } from "@/lib/pdf/operations";
 
 export function PageGridTool({
   mode,
@@ -86,7 +86,7 @@ export function PageGridTool({
               <span className="truncate">{file.name}</span>
             </div>
             <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
-              {thumbnails.length} pages
+              {thumbnails.length} pages · {formatFileSize(file.size)}
             </p>
           </div>
 

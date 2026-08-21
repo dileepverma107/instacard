@@ -6,7 +6,7 @@ import { Loader2, Download, FileText } from "lucide-react";
 import { FileDropzone } from "./FileDropzone";
 import { ToolWorkspace } from "./ToolWorkspace";
 import { getPageCount } from "@/lib/pdf/render";
-import { splitPdf } from "@/lib/pdf/operations";
+import { splitPdf, formatFileSize } from "@/lib/pdf/operations";
 
 type Mode = "individual" | "custom";
 
@@ -103,7 +103,9 @@ export function SplitTool() {
               <p className="truncate text-sm font-medium text-neutral-900 dark:text-white">
                 {file.name}
               </p>
-              <p className="text-xs text-neutral-400">{pageCount} pages</p>
+              <p className="text-xs text-neutral-400">
+                {pageCount} pages · {formatFileSize(file.size)}
+              </p>
             </div>
           </div>
 

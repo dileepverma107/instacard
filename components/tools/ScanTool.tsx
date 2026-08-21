@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Camera, X, ArrowUp, ArrowDown, Loader2, Download, Plus } from "lucide-react";
+import { Camera, X, Loader2, Download, Plus } from "lucide-react";
 import { ToolWorkspace } from "./ToolWorkspace";
 import { imagesToPdf, downloadBytes } from "@/lib/pdf/operations";
 
@@ -13,6 +13,7 @@ interface CapturedImage {
 export function ScanTool() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [images, setImages] = useState<CapturedImage[]>([]);
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [status, setStatus] = useState<"idle" | "working" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
 
@@ -37,12 +38,11 @@ export function ScanTool() {
     });
   }
 
-  function move(i: number, dir: -1 | 1) {
+  function reorder(from: number, to: number) {
     setImages((prev) => {
       const next = [...prev];
-      const j = i + dir;
-      if (j < 0 || j >= next.length) return prev;
-      [next[i], next[j]] = [next[j], next[i]];
+      const [moved] = next.splice(from, 1);
+      next.splice(to, 0, moved);
       return next;
     });
   }
@@ -94,40 +94,27 @@ export function ScanTool() {
             {images.map((img, i) => (
               <div
                 key={img.previewUrl}
-                className="group relative overflow-hidden rounded-2xl border-2 border-neutral-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg dark:border-white/10 dark:bg-neutral-900"
+                draggable
+                onDragStart={() => setDragIndex(i)}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={() => {
+                  if (dragIndex !== null && dragIndex !== i) reorder(dragIndex, i);
+                  setDragIndex(null);
+                }}
+                className="group relative cursor-grab overflow-hidden rounded-2xl border-2 border-neutral-200 bg-white shadow-sm transition active:cursor-grabbing hover:-translate-y-0.5 hover:shadow-lg dark:border-white/10 dark:bg-neutral-900"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={img.previewUrl} alt={`Scan ${i + 1}`} className="w-full" />
                 <div className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-black/60 px-2.5 py-1.5 text-xs text-white backdrop-blur-sm">
                   <span className="font-medium">{i + 1}</span>
-                  <div className="flex items-center gap-2.5">
-                    <button
-                      type="button"
-                      onClick={() => move(i, -1)}
-                      disabled={i === 0}
-                      className="hover:text-blue-400 disabled:opacity-30"
-                      aria-label="Move earlier"
-                    >
-                      <ArrowUp className="h-3.5 w-3.5" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => move(i, 1)}
-                      disabled={i === images.length - 1}
-                      className="hover:text-blue-400 disabled:opacity-30"
-                      aria-label="Move later"
-                    >
-                      <ArrowDown className="h-3.5 w-3.5" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => removeImage(i)}
-                      className="hover:text-red-400"
-                      aria-label="Remove"
-                    >
-                      <X className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => removeImage(i)}
+                    className="hover:text-red-400"
+                    aria-label="Remove"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
                 </div>
               </div>
             ))}
@@ -154,7 +141,7 @@ export function ScanTool() {
               {images.length} page{images.length === 1 ? "" : "s"} captured
             </p>
             <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
-              Use the arrows to reorder pages before creating the PDF.
+              Drag pages to reorder them before creating the PDF.
             </p>
           </div>
 

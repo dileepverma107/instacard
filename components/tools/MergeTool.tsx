@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { FileText, X, ArrowUp, ArrowDown, Loader2, Download, Plus } from "lucide-react";
+import { FileText, X, GripVertical, Loader2, Download, Plus } from "lucide-react";
 import { FileDropzone } from "./FileDropzone";
 import { ToolWorkspace } from "./ToolWorkspace";
-import { mergePdfs, downloadBytes } from "@/lib/pdf/operations";
+import { mergePdfs, downloadBytes, formatFileSize } from "@/lib/pdf/operations";
 
 // Cycled per file so each one is visually distinguishable, like separate
 // colored groups in a traditional PDF organizer.
@@ -12,6 +12,7 @@ const FILE_COLORS = ["bg-blue-700", "bg-indigo-700", "bg-sky-700", "bg-cyan-700"
 
 export function MergeTool() {
   const [files, setFiles] = useState<File[]>([]);
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [status, setStatus] = useState<"idle" | "working" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
 
@@ -23,12 +24,11 @@ export function MergeTool() {
     setFiles((prev) => prev.filter((_, idx) => idx !== i));
   }
 
-  function move(i: number, dir: -1 | 1) {
+  function reorder(from: number, to: number) {
     setFiles((prev) => {
       const next = [...prev];
-      const j = i + dir;
-      if (j < 0 || j >= next.length) return prev;
-      [next[i], next[j]] = [next[j], next[i]];
+      const [moved] = next.splice(from, 1);
+      next.splice(to, 0, moved);
       return next;
     });
   }
@@ -65,8 +65,16 @@ export function MergeTool() {
           {files.map((file, i) => (
             <div
               key={`${file.name}-${i}`}
-              className="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-white p-3.5 shadow-sm dark:border-white/10 dark:bg-white/[0.03]"
+              draggable
+              onDragStart={() => setDragIndex(i)}
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={() => {
+                if (dragIndex !== null && dragIndex !== i) reorder(dragIndex, i);
+                setDragIndex(null);
+              }}
+              className="flex cursor-grab items-center gap-3 rounded-2xl border border-neutral-200 bg-white p-3.5 shadow-sm transition active:cursor-grabbing dark:border-white/10 dark:bg-white/[0.03]"
             >
+              <GripVertical className="h-4 w-4 shrink-0 text-neutral-300 dark:text-neutral-600" />
               <span
                 className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${FILE_COLORS[i % FILE_COLORS.length]}`}
               >
@@ -76,26 +84,10 @@ export function MergeTool() {
                 <p className="truncate text-sm font-medium text-neutral-900 dark:text-white">
                   {file.name}
                 </p>
-                <p className="text-xs text-neutral-400">File {i + 1}</p>
+                <p className="text-xs text-neutral-400">
+                  File {i + 1} · {formatFileSize(file.size)}
+                </p>
               </div>
-              <button
-                type="button"
-                onClick={() => move(i, -1)}
-                disabled={i === 0}
-                className="rounded-lg p-1.5 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-900 disabled:opacity-20 dark:text-neutral-500 dark:hover:bg-white/10 dark:hover:text-white"
-                aria-label="Move up"
-              >
-                <ArrowUp className="h-4 w-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => move(i, 1)}
-                disabled={i === files.length - 1}
-                className="rounded-lg p-1.5 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-900 disabled:opacity-20 dark:text-neutral-500 dark:hover:bg-white/10 dark:hover:text-white"
-                aria-label="Move down"
-              >
-                <ArrowDown className="h-4 w-4" />
-              </button>
               <button
                 type="button"
                 onClick={() => removeFile(i)}
@@ -127,7 +119,7 @@ export function MergeTool() {
               {files.length} file{files.length === 1 ? "" : "s"} selected
             </p>
             <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
-              Use the arrows to set the order they&apos;ll be merged in.
+              Drag files to set the order they&apos;ll be merged in.
             </p>
           </div>
 

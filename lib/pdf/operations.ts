@@ -73,6 +73,12 @@ export async function imagesToPdf(files: File[]): Promise<Uint8Array> {
   return doc.save();
 }
 
+export function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
 export function downloadBytes(bytes: Uint8Array, filename: string, mime = "application/pdf") {
   const blob = new Blob([new Uint8Array(bytes)], { type: mime });
   const url = URL.createObjectURL(blob);
