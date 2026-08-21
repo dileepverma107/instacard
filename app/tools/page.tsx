@@ -62,7 +62,7 @@ export default function ToolsHubPage() {
                   const isLive = LIVE_TOOL_SLUGS.has(tool.slug);
                   const content = (
                     <>
-                      <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-tr from-amber-400 via-pink-500 to-purple-600">
+                      <span className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-700">
                         <Icon className="h-4.5 w-4.5 text-white" />
                       </span>
                       <p className="mt-3 text-sm font-semibold text-neutral-900 dark:text-white">

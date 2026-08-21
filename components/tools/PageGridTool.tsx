@@ -82,7 +82,7 @@ export function PageGridTool({
         <div className="space-y-5">
           <div>
             <div className="flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-white">
-              <FileText className="h-4 w-4 shrink-0 text-pink-500 dark:text-pink-400" />
+              <FileText className="h-4 w-4 shrink-0 text-blue-600 dark:text-blue-400" />
               <span className="truncate">{file.name}</span>
             </div>
             <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
@@ -98,7 +98,7 @@ export function PageGridTool({
             type="button"
             onClick={handleSave}
             disabled={result.length === 0 || status === "working"}
-            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-tr from-amber-400 via-pink-500 to-purple-600 px-4 py-3.5 text-sm font-semibold text-white shadow-lg shadow-pink-500/20 transition hover:shadow-xl hover:shadow-pink-500/30 disabled:opacity-40 disabled:shadow-none"
+            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-700 px-4 py-3.5 text-sm font-semibold text-white shadow-lg shadow-blue-700/25 transition hover:bg-blue-800 hover:shadow-xl hover:shadow-blue-700/30 disabled:opacity-40 disabled:shadow-none"
           >
             {status === "working" ? (
               <Loader2 className="h-4 w-4 animate-spin" />

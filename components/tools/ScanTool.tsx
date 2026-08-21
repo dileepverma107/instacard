@@ -65,7 +65,7 @@ export function ScanTool() {
       onClick={() => inputRef.current?.click()}
       className="mx-auto flex max-w-xl cursor-pointer flex-col items-center justify-center gap-5 rounded-3xl border-2 border-dashed border-neutral-200 bg-white/60 px-6 py-20 text-center transition hover:border-neutral-300 dark:border-white/10 dark:bg-white/[0.02] dark:hover:border-white/20"
     >
-      <span className="flex items-center gap-2 rounded-2xl bg-gradient-to-tr from-amber-400 via-pink-500 to-purple-600 px-8 py-4 text-base font-semibold text-white shadow-lg shadow-pink-500/20">
+      <span className="flex items-center gap-2 rounded-2xl bg-blue-700 px-8 py-4 text-base font-semibold text-white shadow-lg shadow-blue-700/25">
         <Camera className="h-5 w-5" />
         Take a photo or choose images
       </span>
@@ -105,7 +105,7 @@ export function ScanTool() {
                       type="button"
                       onClick={() => move(i, -1)}
                       disabled={i === 0}
-                      className="hover:text-pink-400 disabled:opacity-30"
+                      className="hover:text-blue-400 disabled:opacity-30"
                       aria-label="Move earlier"
                     >
                       <ArrowUp className="h-3.5 w-3.5" />
@@ -114,7 +114,7 @@ export function ScanTool() {
                       type="button"
                       onClick={() => move(i, 1)}
                       disabled={i === images.length - 1}
-                      className="hover:text-pink-400 disabled:opacity-30"
+                      className="hover:text-blue-400 disabled:opacity-30"
                       aria-label="Move later"
                     >
                       <ArrowDown className="h-3.5 w-3.5" />
@@ -164,7 +164,7 @@ export function ScanTool() {
             type="button"
             onClick={handleCreate}
             disabled={status === "working"}
-            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-tr from-amber-400 via-pink-500 to-purple-600 px-4 py-3.5 text-sm font-semibold text-white shadow-lg shadow-pink-500/20 transition hover:shadow-xl hover:shadow-pink-500/30 disabled:opacity-40 disabled:shadow-none"
+            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-700 px-4 py-3.5 text-sm font-semibold text-white shadow-lg shadow-blue-700/25 transition hover:bg-blue-800 hover:shadow-xl hover:shadow-blue-700/30 disabled:opacity-40 disabled:shadow-none"
           >
             {status === "working" ? (
               <Loader2 className="h-4 w-4 animate-spin" />

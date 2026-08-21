@@ -34,14 +34,14 @@ export function FileDropzone({ accept, multiple, label, sublabel, onFiles }: Fil
       }}
       className={`mx-auto flex max-w-xl flex-col items-center justify-center gap-5 rounded-3xl border-2 border-dashed px-6 py-20 text-center transition ${
         dragging
-          ? "border-pink-500 bg-pink-500/5"
+          ? "border-blue-500 bg-blue-500/5"
           : "border-neutral-200 bg-white/60 dark:border-white/10 dark:bg-white/[0.02]"
       }`}
     >
       <button
         type="button"
         onClick={() => inputRef.current?.click()}
-        className="flex items-center gap-2 rounded-2xl bg-gradient-to-tr from-amber-400 via-pink-500 to-purple-600 px-8 py-4 text-base font-semibold text-white shadow-lg shadow-pink-500/20 transition hover:shadow-xl hover:shadow-pink-500/30 active:scale-[0.98]"
+        className="flex items-center gap-2 rounded-2xl bg-blue-700 px-8 py-4 text-base font-semibold text-white shadow-lg shadow-blue-700/25 transition hover:bg-blue-800 hover:shadow-xl hover:shadow-blue-700/30 active:scale-[0.98]"
       >
         <UploadCloud className="h-5 w-5" />
         {label}

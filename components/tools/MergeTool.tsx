@@ -6,6 +6,10 @@ import { FileDropzone } from "./FileDropzone";
 import { ToolWorkspace } from "./ToolWorkspace";
 import { mergePdfs, downloadBytes } from "@/lib/pdf/operations";
 
+// Cycled per file so each one is visually distinguishable, like separate
+// colored groups in a traditional PDF organizer.
+const FILE_COLORS = ["bg-blue-700", "bg-indigo-700", "bg-sky-700", "bg-cyan-700"];
+
 export function MergeTool() {
   const [files, setFiles] = useState<File[]>([]);
   const [status, setStatus] = useState<"idle" | "working" | "error">("idle");
@@ -63,7 +67,9 @@ export function MergeTool() {
               key={`${file.name}-${i}`}
               className="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-white p-3.5 shadow-sm dark:border-white/10 dark:bg-white/[0.03]"
             >
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-amber-400 via-pink-500 to-purple-600">
+              <span
+                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${FILE_COLORS[i % FILE_COLORS.length]}`}
+              >
                 <FileText className="h-4.5 w-4.5 text-white" />
               </span>
               <div className="min-w-0 flex-1">
@@ -131,7 +137,7 @@ export function MergeTool() {
             type="button"
             onClick={handleMerge}
             disabled={files.length < 2 || status === "working"}
-            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-tr from-amber-400 via-pink-500 to-purple-600 px-4 py-3.5 text-sm font-semibold text-white shadow-lg shadow-pink-500/20 transition hover:shadow-xl hover:shadow-pink-500/30 disabled:opacity-40 disabled:shadow-none"
+            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-700 px-4 py-3.5 text-sm font-semibold text-white shadow-lg shadow-blue-700/25 transition hover:bg-blue-800 hover:shadow-xl hover:shadow-blue-700/30 disabled:opacity-40 disabled:shadow-none"
           >
             {status === "working" ? (
               <Loader2 className="h-4 w-4 animate-spin" />

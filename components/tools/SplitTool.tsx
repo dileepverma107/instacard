@@ -96,7 +96,7 @@ export function SplitTool() {
       main={
         <div className="space-y-4">
           <div className="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-white/[0.03]">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-amber-400 via-pink-500 to-purple-600">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-700">
               <FileText className="h-4.5 w-4.5 text-white" />
             </span>
             <div className="min-w-0 flex-1">
@@ -115,7 +115,7 @@ export function SplitTool() {
                 onClick={() => setMode(m)}
                 className={`rounded-2xl border-2 p-4 text-left text-sm font-medium transition ${
                   mode === m
-                    ? "border-pink-500 bg-pink-500/5 text-neutral-900 dark:text-white"
+                    ? "border-blue-500 bg-blue-500/5 text-neutral-900 dark:text-white"
                     : "border-neutral-200 text-neutral-500 hover:border-neutral-300 dark:border-white/10 dark:text-neutral-400 dark:hover:border-white/20"
                 }`}
               >
@@ -135,7 +135,7 @@ export function SplitTool() {
                 value={customRanges}
                 onChange={(e) => setCustomRanges(e.target.value)}
                 placeholder="e.g. 1-3, 4-6, 7-10"
-                className="w-full rounded-2xl border border-neutral-300 bg-white px-4 py-3.5 text-sm text-neutral-900 placeholder-neutral-400 outline-none focus:border-pink-500 dark:border-white/10 dark:bg-white/[0.03] dark:text-white dark:placeholder-neutral-500"
+                className="w-full rounded-2xl border border-neutral-300 bg-white px-4 py-3.5 text-sm text-neutral-900 placeholder-neutral-400 outline-none focus:border-blue-500 dark:border-white/10 dark:bg-white/[0.03] dark:text-white dark:placeholder-neutral-500"
               />
               <p className="mt-1.5 text-xs text-neutral-500">
                 Each range becomes its own PDF file, bundled in a zip.
@@ -159,7 +159,7 @@ export function SplitTool() {
             type="button"
             onClick={handleSplit}
             disabled={status === "working"}
-            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-tr from-amber-400 via-pink-500 to-purple-600 px-4 py-3.5 text-sm font-semibold text-white shadow-lg shadow-pink-500/20 transition hover:shadow-xl hover:shadow-pink-500/30 disabled:opacity-40 disabled:shadow-none"
+            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-700 px-4 py-3.5 text-sm font-semibold text-white shadow-lg shadow-blue-700/25 transition hover:bg-blue-800 hover:shadow-xl hover:shadow-blue-700/30 disabled:opacity-40 disabled:shadow-none"
           >
             {status === "working" ? (
               <Loader2 className="h-4 w-4 animate-spin" />

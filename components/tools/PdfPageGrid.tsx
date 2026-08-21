@@ -72,7 +72,7 @@ export function PdfPageGrid({
           onClick={() => selectable && toggle(i)}
           className={`group relative overflow-hidden rounded-2xl border-2 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg dark:bg-neutral-900 ${
             selectable
-              ? `cursor-pointer ${page.removed ? "border-neutral-200 opacity-30 dark:border-neutral-800" : "border-pink-500 ring-2 ring-pink-500/20"}`
+              ? `cursor-pointer ${page.removed ? "border-neutral-200 opacity-30 dark:border-neutral-800" : "border-blue-500 ring-2 ring-blue-500/20"}`
               : "cursor-grab border-neutral-200 active:cursor-grabbing dark:border-neutral-800"
           }`}
         >
@@ -89,7 +89,7 @@ export function PdfPageGrid({
             </div>
           )}
           {selectable && !page.removed && (
-            <span className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-tr from-amber-400 via-pink-500 to-purple-600 shadow-md">
+            <span className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-blue-700 shadow-md">
               <Check className="h-3.5 w-3.5 text-white" />
             </span>
           )}
@@ -103,7 +103,7 @@ export function PdfPageGrid({
                     e.stopPropagation();
                     rotate(i);
                   }}
-                  className="hover:text-pink-400"
+                  className="hover:text-blue-400"
                   aria-label="Rotate page"
                 >
                   <RotateCw className="h-3.5 w-3.5" />

@@ -10,8 +10,8 @@ export function ToolShell({
   return (
     <main className="relative px-6 py-10 sm:py-14">
       <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-72 overflow-hidden">
-        <div className="absolute left-1/4 top-0 h-64 w-64 rounded-full bg-pink-500/20 blur-[100px] dark:bg-pink-500/15" />
-        <div className="absolute right-1/4 top-0 h-64 w-64 rounded-full bg-purple-500/20 blur-[100px] dark:bg-purple-500/15" />
+        <div className="absolute left-1/4 top-0 h-64 w-64 rounded-full bg-blue-500/20 blur-[100px] dark:bg-blue-500/15" />
+        <div className="absolute right-1/4 top-0 h-64 w-64 rounded-full bg-indigo-600/20 blur-[100px] dark:bg-indigo-600/15" />
       </div>
 
       <div className="mx-auto max-w-6xl">
