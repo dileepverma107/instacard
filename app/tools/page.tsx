@@ -1,36 +1,12 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import {
-  Layers, Scissors, FileMinus, FileOutput, Grid3x3, Camera,
-  Shrink, Wrench, ScanText, Image as ImageIcon, FileText,
-  Droplet, Hash, Crop, Lock, Unlock, PenLine, Lock as LockIcon,
-} from "lucide-react";
 import { TOOL_CATEGORIES, LIVE_TOOL_SLUGS } from "@/lib/toolsCatalog";
+import { TOOL_ICONS, CATEGORY_COLORS } from "@/components/tools/toolIcons";
 
 export const metadata: Metadata = {
   title: "Free PDF Tools — InstaCard",
   description: "Merge, split, organize, and edit PDFs for free, right in your browser. No upload, no sign-up required.",
   alternates: { canonical: "/tools" },
-};
-
-const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
-  layers: Layers,
-  scissors: Scissors,
-  "file-minus": FileMinus,
-  "file-output": FileOutput,
-  grid: Grid3x3,
-  camera: Camera,
-  shrink: Shrink,
-  wrench: Wrench,
-  "scan-text": ScanText,
-  image: ImageIcon,
-  "file-text": FileText,
-  droplet: Droplet,
-  hash: Hash,
-  crop: Crop,
-  lock: Lock,
-  unlock: Unlock,
-  "pen-line": PenLine,
 };
 
 export default function ToolsHubPage() {
@@ -58,12 +34,14 @@ export default function ToolsHubPage() {
               </h2>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
                 {category.tools.map((tool) => {
-                  const Icon = ICONS[tool.icon] ?? LockIcon;
+                  const Icon = TOOL_ICONS[tool.icon];
                   const isLive = LIVE_TOOL_SLUGS.has(tool.slug);
                   const content = (
                     <>
-                      <span className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-700">
-                        <Icon className="h-4.5 w-4.5 text-white" />
+                      <span
+                        className={`flex h-10 w-10 items-center justify-center rounded-full ${CATEGORY_COLORS[category.name] ?? "bg-blue-700"}`}
+                      >
+                        {Icon && <Icon className="h-4.5 w-4.5 text-white" />}
                       </span>
                       <p className="mt-3 text-sm font-semibold text-neutral-900 dark:text-white">
                         {tool.name}
