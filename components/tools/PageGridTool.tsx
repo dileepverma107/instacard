@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Loader2, Download, FileText } from "lucide-react";
 import { FileDropzone } from "./FileDropzone";
 import { PdfPageGrid, type PdfPageGridMode } from "./PdfPageGrid";
+import { ToolWorkspace } from "./ToolWorkspace";
 import { renderPageThumbnails, type PageThumbnail } from "@/lib/pdf/render";
 import { rebuildFromPages, downloadBytes, type OrderedPage } from "@/lib/pdf/operations";
 
@@ -58,7 +59,8 @@ export function PageGridTool({
     return (
       <FileDropzone
         accept="application/pdf"
-        label="Choose a PDF file or drag it here"
+        label="Select PDF file"
+        sublabel="Choose a file to get started"
         onFiles={handleFile}
       />
     );
@@ -66,7 +68,7 @@ export function PageGridTool({
 
   if (status === "loading") {
     return (
-      <div className="flex flex-col items-center gap-3 py-16 text-neutral-500 dark:text-neutral-400">
+      <div className="flex flex-col items-center gap-3 py-24 text-neutral-500 dark:text-neutral-400">
         <Loader2 className="h-6 w-6 animate-spin" />
         Rendering pages…
       </div>
@@ -74,32 +76,39 @@ export function PageGridTool({
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3 rounded-xl border border-neutral-200 bg-white px-4 py-3 dark:border-neutral-800 dark:bg-neutral-900/50">
-        <FileText className="h-4 w-4 shrink-0 text-pink-500 dark:text-pink-400" />
-        <span className="flex-1 truncate text-sm text-neutral-900 dark:text-white">{file.name}</span>
-        <span className="text-xs text-neutral-500">{thumbnails.length} pages</span>
-      </div>
+    <ToolWorkspace
+      main={<PdfPageGrid pages={thumbnails} mode={mode} onChange={setResult} />}
+      sidebar={
+        <div className="space-y-5">
+          <div>
+            <div className="flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-white">
+              <FileText className="h-4 w-4 shrink-0 text-pink-500 dark:text-pink-400" />
+              <span className="truncate">{file.name}</span>
+            </div>
+            <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+              {thumbnails.length} pages
+            </p>
+          </div>
 
-      <p className="text-sm text-neutral-500 dark:text-neutral-400">{hint}</p>
+          <p className="text-sm text-neutral-500 dark:text-neutral-400">{hint}</p>
 
-      <PdfPageGrid pages={thumbnails} mode={mode} onChange={setResult} />
+          {error && <p className="text-sm text-red-500 dark:text-red-400">{error}</p>}
 
-      {error && <p className="text-sm text-red-500 dark:text-red-400">{error}</p>}
-
-      <button
-        type="button"
-        onClick={handleSave}
-        disabled={result.length === 0 || status === "working"}
-        className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-tr from-amber-400 via-pink-500 to-purple-600 px-4 py-3 text-sm font-semibold text-white transition disabled:opacity-40"
-      >
-        {status === "working" ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
-        ) : (
-          <Download className="h-4 w-4" />
-        )}
-        {actionLabel} ({result.length} page{result.length === 1 ? "" : "s"})
-      </button>
-    </div>
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={result.length === 0 || status === "working"}
+            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-tr from-amber-400 via-pink-500 to-purple-600 px-4 py-3.5 text-sm font-semibold text-white shadow-lg shadow-pink-500/20 transition hover:shadow-xl hover:shadow-pink-500/30 disabled:opacity-40 disabled:shadow-none"
+          >
+            {status === "working" ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Download className="h-4 w-4" />
+            )}
+            {actionLabel} ({result.length})
+          </button>
+        </div>
+      }
+    />
   );
 }

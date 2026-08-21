@@ -22,7 +22,6 @@ export function FileDropzone({ accept, multiple, label, sublabel, onFiles }: Fil
 
   return (
     <div
-      onClick={() => inputRef.current?.click()}
       onDragOver={(e) => {
         e.preventDefault();
         setDragging(true);
@@ -33,17 +32,22 @@ export function FileDropzone({ accept, multiple, label, sublabel, onFiles }: Fil
         setDragging(false);
         handleFiles(e.dataTransfer.files);
       }}
-      className={`flex cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed px-6 py-16 text-center transition ${
+      className={`mx-auto flex max-w-xl flex-col items-center justify-center gap-5 rounded-3xl border-2 border-dashed px-6 py-20 text-center transition ${
         dragging
           ? "border-pink-500 bg-pink-500/5"
-          : "border-neutral-300 bg-neutral-50 hover:border-neutral-400 dark:border-neutral-700 dark:bg-neutral-900/50 dark:hover:border-neutral-600"
+          : "border-neutral-200 bg-white/60 dark:border-white/10 dark:bg-white/[0.02]"
       }`}
     >
-      <span className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-tr from-amber-400 via-pink-500 to-purple-600">
-        <UploadCloud className="h-6 w-6 text-white" />
-      </span>
-      <p className="text-base font-semibold text-neutral-900 dark:text-white">{label}</p>
+      <button
+        type="button"
+        onClick={() => inputRef.current?.click()}
+        className="flex items-center gap-2 rounded-2xl bg-gradient-to-tr from-amber-400 via-pink-500 to-purple-600 px-8 py-4 text-base font-semibold text-white shadow-lg shadow-pink-500/20 transition hover:shadow-xl hover:shadow-pink-500/30 active:scale-[0.98]"
+      >
+        <UploadCloud className="h-5 w-5" />
+        {label}
+      </button>
       {sublabel && <p className="text-sm text-neutral-500 dark:text-neutral-400">{sublabel}</p>}
+      <p className="text-xs text-neutral-400 dark:text-neutral-600">or drop files here</p>
       <input
         ref={inputRef}
         type="file"

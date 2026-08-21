@@ -58,7 +58,7 @@ export function PdfPageGrid({
   const selectable = mode !== "organize";
 
   return (
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+    <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4">
       {items.map((page, i) => (
         <div
           key={page.index}
@@ -70,9 +70,9 @@ export function PdfPageGrid({
             setDragIndex(null);
           }}
           onClick={() => selectable && toggle(i)}
-          className={`group relative overflow-hidden rounded-xl border-2 bg-white transition dark:bg-neutral-900 ${
+          className={`group relative overflow-hidden rounded-2xl border-2 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg dark:bg-neutral-900 ${
             selectable
-              ? `cursor-pointer ${page.removed ? "border-neutral-200 opacity-30 dark:border-neutral-800" : "border-pink-500"}`
+              ? `cursor-pointer ${page.removed ? "border-neutral-200 opacity-30 dark:border-neutral-800" : "border-pink-500 ring-2 ring-pink-500/20"}`
               : "cursor-grab border-neutral-200 active:cursor-grabbing dark:border-neutral-800"
           }`}
         >
@@ -88,10 +88,15 @@ export function PdfPageGrid({
               Removed
             </div>
           )}
-          <div className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-black/70 px-2 py-1 text-xs text-white">
-            <span>Page {page.index + 1}</span>
-            {mode === "organize" ? (
-              <div className="flex items-center gap-2">
+          {selectable && !page.removed && (
+            <span className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-tr from-amber-400 via-pink-500 to-purple-600 shadow-md">
+              <Check className="h-3.5 w-3.5 text-white" />
+            </span>
+          )}
+          <div className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-black/60 px-2.5 py-1.5 text-xs text-white backdrop-blur-sm">
+            <span className="font-medium">{page.index + 1}</span>
+            {mode === "organize" && (
+              <div className="flex items-center gap-2.5">
                 <button
                   type="button"
                   onClick={(e) => {
@@ -115,8 +120,6 @@ export function PdfPageGrid({
                   <Trash2 className="h-3.5 w-3.5" />
                 </button>
               </div>
-            ) : (
-              !page.removed && <Check className="h-3.5 w-3.5 text-pink-400" />
             )}
           </div>
         </div>
