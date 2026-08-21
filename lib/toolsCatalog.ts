@@ -33,10 +33,15 @@ export const TOOL_CATEGORIES: ToolCategory[] = [
   {
     name: "Convert PDF",
     tools: [
-      { slug: "jpg-to-pdf", name: "JPG to PDF", description: "Convert images to PDF.", icon: "image" },
-      { slug: "word-to-pdf", name: "Word to PDF", description: "Convert DOC/DOCX to PDF.", icon: "file-text" },
-      { slug: "pdf-to-word", name: "PDF to Word", description: "Convert PDF to an editable document.", icon: "file-text" },
-      { slug: "pdf-to-jpg", name: "PDF to JPG", description: "Convert PDF pages to images.", icon: "image" },
+      { slug: "jpg-to-pdf", name: "JPG to PDF", description: "Convert images to PDF.", icon: "jpg" },
+      { slug: "word-to-pdf", name: "Word to PDF", description: "Convert DOC/DOCX to PDF.", icon: "word" },
+      { slug: "powerpoint-to-pdf", name: "PowerPoint to PDF", description: "Convert slideshows to PDF.", icon: "powerpoint" },
+      { slug: "excel-to-pdf", name: "Excel to PDF", description: "Convert spreadsheets to PDF.", icon: "excel" },
+      { slug: "html-to-pdf", name: "HTML to PDF", description: "Convert a webpage to PDF.", icon: "html" },
+      { slug: "pdf-to-word", name: "PDF to Word", description: "Convert PDF to an editable document.", icon: "word" },
+      { slug: "pdf-to-powerpoint", name: "PDF to PowerPoint", description: "Convert PDF to a slideshow.", icon: "powerpoint" },
+      { slug: "pdf-to-excel", name: "PDF to Excel", description: "Pull data into a spreadsheet.", icon: "excel" },
+      { slug: "pdf-to-jpg", name: "PDF to JPG", description: "Convert PDF pages to images.", icon: "jpg" },
     ],
   },
   {

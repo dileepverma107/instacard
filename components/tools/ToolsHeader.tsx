@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 import { ChevronDown, Menu, X } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { TOOL_CATEGORIES, LIVE_TOOL_SLUGS } from "@/lib/toolsCatalog";
-import { TOOL_ICONS, CATEGORY_COLORS } from "./toolIcons";
+import { TOOL_ICONS, CATEGORY_COLORS, ICON_COLORS } from "./toolIcons";
 
 const TOP_LEVEL_SLUGS = ["merge-pdf", "split-pdf", "organize-pdf"];
 
@@ -67,11 +67,11 @@ export function ToolsHeader() {
               </button>
 
               {allToolsOpen && (
-                <div className="absolute left-1/2 top-full z-40 mt-3 w-[820px] max-w-[92vw] -translate-x-1/2 rounded-2xl border border-neutral-200 bg-white p-6 shadow-2xl dark:border-white/10 dark:bg-neutral-900">
+                <div className="absolute left-1/2 top-full z-40 mt-3 w-[1120px] max-w-[95vw] -translate-x-1/2 rounded-2xl border border-neutral-200 bg-white p-6 shadow-2xl dark:border-white/10 dark:bg-neutral-900">
                   <span className="absolute -top-1.5 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 border-l border-t border-neutral-200 bg-white dark:border-white/10 dark:bg-neutral-900" />
-                  <div className="grid grid-cols-5 gap-6">
+                  <div className="grid grid-cols-5 gap-5">
                     {TOOL_CATEGORIES.map((category) => (
-                      <div key={category.name}>
+                      <div key={category.name} className="min-w-0">
                         <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-neutral-400 dark:text-neutral-500">
                           {category.name}
                         </p>
@@ -80,9 +80,10 @@ export function ToolsHeader() {
                             const Icon = TOOL_ICONS[tool.icon];
                             const isLive = LIVE_TOOL_SLUGS.has(tool.slug);
                             const active = pathname === `/tools/${tool.slug}`;
+                            const color = ICON_COLORS[tool.icon] ?? CATEGORY_COLORS[category.name] ?? "bg-blue-600";
                             const iconBadge = (
                               <span
-                                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${CATEGORY_COLORS[category.name] ?? "bg-blue-600"} ${isLive ? "" : "opacity-40"}`}
+                                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${color} ${isLive ? "" : "opacity-40"}`}
                               >
                                 {Icon && <Icon className="h-3.5 w-3.5 text-white" />}
                               </span>
@@ -91,7 +92,7 @@ export function ToolsHeader() {
                               <Link
                                 key={tool.slug}
                                 href={`/tools/${tool.slug}`}
-                                className={`flex items-center gap-2.5 rounded-lg px-1.5 py-1.5 text-sm transition ${
+                                className={`flex items-center gap-2.5 whitespace-nowrap rounded-lg px-1.5 py-1.5 text-sm transition ${
                                   active
                                     ? "font-medium text-blue-700 dark:text-blue-400"
                                     : "text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-white/5"
@@ -103,11 +104,11 @@ export function ToolsHeader() {
                             ) : (
                               <div
                                 key={tool.slug}
-                                className="flex items-center gap-2.5 rounded-lg px-1.5 py-1.5 text-sm text-neutral-400 dark:text-neutral-600"
+                                className="flex items-center gap-2 whitespace-nowrap rounded-lg px-1.5 py-1.5 text-sm text-neutral-400 dark:text-neutral-600"
                               >
                                 {iconBadge}
-                                <span className="flex-1">{tool.name}</span>
-                                <span className="rounded-full bg-neutral-100 px-1.5 py-0.5 text-[10px] dark:bg-white/5">
+                                <span>{tool.name}</span>
+                                <span className="shrink-0 rounded-full bg-neutral-100 px-1.5 py-0.5 text-[10px] dark:bg-white/5">
                                   Soon
                                 </span>
                               </div>
@@ -153,9 +154,10 @@ export function ToolsHeader() {
                 {category.tools.map((tool) => {
                   const Icon = TOOL_ICONS[tool.icon];
                   const isLive = LIVE_TOOL_SLUGS.has(tool.slug);
+                  const color = ICON_COLORS[tool.icon] ?? CATEGORY_COLORS[category.name] ?? "bg-blue-600";
                   const iconBadge = (
                     <span
-                      className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${CATEGORY_COLORS[category.name] ?? "bg-blue-600"} ${isLive ? "" : "opacity-40"}`}
+                      className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${color} ${isLive ? "" : "opacity-40"}`}
                     >
                       {Icon && <Icon className="h-3.5 w-3.5 text-white" />}
                     </span>

@@ -1,7 +1,7 @@
 import {
   Layers, Scissors, FileMinus, FileOutput, Grid3x3, Camera,
-  Shrink, Wrench, ScanText, Image as ImageIcon, FileText,
-  Droplet, Hash, Crop, Lock, Unlock, PenLine,
+  Shrink, Wrench, ScanText, FileImage, FileType, Presentation,
+  FileSpreadsheet, Globe, Droplet, Hash, Crop, Lock, Unlock, PenLine,
 } from "lucide-react";
 
 export const TOOL_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -14,8 +14,11 @@ export const TOOL_ICONS: Record<string, React.ComponentType<{ className?: string
   shrink: Shrink,
   wrench: Wrench,
   "scan-text": ScanText,
-  image: ImageIcon,
-  "file-text": FileText,
+  jpg: FileImage,
+  word: FileType,
+  powerpoint: Presentation,
+  excel: FileSpreadsheet,
+  html: Globe,
   droplet: Droplet,
   hash: Hash,
   crop: Crop,
@@ -24,12 +27,21 @@ export const TOOL_ICONS: Record<string, React.ComponentType<{ className?: string
   "pen-line": PenLine,
 };
 
-// One shade per category so the mega-menu stays scannable while staying
-// inside the blue family (no Instagram gradient).
+// One shade per category, used as the default badge color.
 export const CATEGORY_COLORS: Record<string, string> = {
   "Organize PDF": "bg-blue-600",
   "Optimize PDF": "bg-sky-600",
   "Convert PDF": "bg-indigo-600",
   "Edit PDF": "bg-cyan-600",
   "PDF Security": "bg-slate-600",
+};
+
+// Per-file-format overrides so Convert PDF's icons stay visually distinct
+// from one another instead of every tool sharing the category color.
+export const ICON_COLORS: Record<string, string> = {
+  jpg: "bg-sky-500",
+  word: "bg-blue-600",
+  powerpoint: "bg-orange-500",
+  excel: "bg-emerald-600",
+  html: "bg-cyan-600",
 };

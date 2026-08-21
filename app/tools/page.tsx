@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { TOOL_CATEGORIES, LIVE_TOOL_SLUGS } from "@/lib/toolsCatalog";
-import { TOOL_ICONS, CATEGORY_COLORS } from "@/components/tools/toolIcons";
+import { TOOL_ICONS, CATEGORY_COLORS, ICON_COLORS } from "@/components/tools/toolIcons";
 
 export const metadata: Metadata = {
   title: "Free PDF Tools — InstaCard",
@@ -36,11 +36,10 @@ export default function ToolsHubPage() {
                 {category.tools.map((tool) => {
                   const Icon = TOOL_ICONS[tool.icon];
                   const isLive = LIVE_TOOL_SLUGS.has(tool.slug);
+                  const color = ICON_COLORS[tool.icon] ?? CATEGORY_COLORS[category.name] ?? "bg-blue-700";
                   const content = (
                     <>
-                      <span
-                        className={`flex h-10 w-10 items-center justify-center rounded-full ${CATEGORY_COLORS[category.name] ?? "bg-blue-700"}`}
-                      >
+                      <span className={`flex h-10 w-10 items-center justify-center rounded-full ${color}`}>
                         {Icon && <Icon className="h-4.5 w-4.5 text-white" />}
                       </span>
                       <p className="mt-3 text-sm font-semibold text-neutral-900 dark:text-white">
