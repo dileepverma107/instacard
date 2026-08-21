@@ -36,14 +36,14 @@ export function FileDropzone({ accept, multiple, label, sublabel, onFiles }: Fil
       className={`flex cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed px-6 py-16 text-center transition ${
         dragging
           ? "border-pink-500 bg-pink-500/5"
-          : "border-neutral-700 bg-neutral-900/50 hover:border-neutral-600"
+          : "border-neutral-300 bg-neutral-50 hover:border-neutral-400 dark:border-neutral-700 dark:bg-neutral-900/50 dark:hover:border-neutral-600"
       }`}
     >
       <span className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-tr from-amber-400 via-pink-500 to-purple-600">
         <UploadCloud className="h-6 w-6 text-white" />
       </span>
-      <p className="text-base font-semibold text-white">{label}</p>
-      {sublabel && <p className="text-sm text-neutral-400">{sublabel}</p>}
+      <p className="text-base font-semibold text-neutral-900 dark:text-white">{label}</p>
+      {sublabel && <p className="text-sm text-neutral-500 dark:text-neutral-400">{sublabel}</p>}
       <input
         ref={inputRef}
         type="file"

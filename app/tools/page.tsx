@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import type { Metadata } from "next";
 import {
   Layers, Scissors, FileMinus, FileOutput, Grid3x3, Camera,
@@ -36,23 +35,25 @@ const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
 
 export default function ToolsHubPage() {
   return (
-    <main className="min-h-dvh bg-neutral-950 px-6 py-16 text-white">
+    <main className="px-6 py-14 sm:py-20">
       <div className="mx-auto max-w-5xl">
-        <Link href="/" className="mb-10 flex items-center gap-2">
-          <Image src="/logo.png" alt="InstaCard" width={28} height={28} className="rounded-lg" />
-          <span className="text-base font-semibold tracking-tight">InstaCard</span>
-        </Link>
+        <div className="text-center">
+          <p className="mb-4 inline-block rounded-full border border-neutral-200 bg-white px-3 py-1 text-xs font-medium text-neutral-500 dark:border-white/10 dark:bg-white/5 dark:text-neutral-400">
+            100% free · runs in your browser
+          </p>
+          <h1 className="text-3xl font-bold tracking-tight text-neutral-900 dark:text-white sm:text-4xl">
+            Every PDF tool you need
+          </h1>
+          <p className="mx-auto mt-3 max-w-lg text-neutral-500 dark:text-neutral-400">
+            Files are never uploaded to a server unless you choose to save the result to your
+            account — everything happens right here on your device.
+          </p>
+        </div>
 
-        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Free PDF Tools</h1>
-        <p className="mt-3 max-w-lg text-neutral-400">
-          Every tool runs right in your browser — files are never uploaded to a server unless you
-          choose to save the result to your account.
-        </p>
-
-        <div className="mt-12 space-y-10">
+        <div className="mt-14 space-y-12">
           {TOOL_CATEGORIES.map((category) => (
             <section key={category.name}>
-              <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-neutral-500">
+              <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-neutral-400 dark:text-neutral-500">
                 {category.name}
               </h2>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
@@ -64,10 +65,14 @@ export default function ToolsHubPage() {
                       <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-tr from-amber-400 via-pink-500 to-purple-600">
                         <Icon className="h-4.5 w-4.5 text-white" />
                       </span>
-                      <p className="mt-3 text-sm font-semibold text-white">{tool.name}</p>
-                      <p className="mt-1 text-xs text-neutral-500">{tool.description}</p>
+                      <p className="mt-3 text-sm font-semibold text-neutral-900 dark:text-white">
+                        {tool.name}
+                      </p>
+                      <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-500">
+                        {tool.description}
+                      </p>
                       {!isLive && (
-                        <span className="mt-2 inline-block rounded-full bg-white/5 px-2 py-0.5 text-[10px] font-medium text-neutral-400">
+                        <span className="mt-2 inline-block rounded-full bg-neutral-100 px-2 py-0.5 text-[10px] font-medium text-neutral-500 dark:bg-white/5 dark:text-neutral-400">
                           Coming soon
                         </span>
                       )}
@@ -77,14 +82,14 @@ export default function ToolsHubPage() {
                     <Link
                       key={tool.slug}
                       href={`/tools/${tool.slug}`}
-                      className="rounded-2xl border border-neutral-800 bg-neutral-900/50 p-4 transition hover:border-neutral-700 hover:bg-neutral-900"
+                      className="rounded-2xl border border-neutral-200/80 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-neutral-300 hover:shadow-md dark:border-white/10 dark:bg-white/[0.03] dark:hover:border-white/20 dark:hover:bg-white/[0.06]"
                     >
                       {content}
                     </Link>
                   ) : (
                     <div
                       key={tool.slug}
-                      className="cursor-not-allowed rounded-2xl border border-neutral-800 bg-neutral-900/50 p-4 opacity-50"
+                      className="cursor-not-allowed rounded-2xl border border-neutral-200/80 bg-white p-4 opacity-50 dark:border-white/10 dark:bg-white/[0.03]"
                     >
                       {content}
                     </div>

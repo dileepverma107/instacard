@@ -63,13 +63,13 @@ export function ScanTool() {
     <div className="space-y-6">
       <div
         onClick={() => inputRef.current?.click()}
-        className="flex cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-neutral-700 bg-neutral-900/50 px-6 py-16 text-center transition hover:border-neutral-600"
+        className="flex cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-neutral-300 bg-neutral-50 px-6 py-16 text-center transition hover:border-neutral-400 dark:border-neutral-700 dark:bg-neutral-900/50 dark:hover:border-neutral-600"
       >
         <span className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-tr from-amber-400 via-pink-500 to-purple-600">
           <Camera className="h-6 w-6 text-white" />
         </span>
-        <p className="text-base font-semibold text-white">Take a photo or choose images</p>
-        <p className="text-sm text-neutral-400">On mobile this opens your camera directly</p>
+        <p className="text-base font-semibold text-neutral-900 dark:text-white">Take a photo or choose images</p>
+        <p className="text-sm text-neutral-500 dark:text-neutral-400">On mobile this opens your camera directly</p>
         <input
           ref={inputRef}
           type="file"
@@ -86,7 +86,7 @@ export function ScanTool() {
           {images.map((img, i) => (
             <div
               key={img.previewUrl}
-              className="group relative overflow-hidden rounded-xl border-2 border-neutral-800 bg-neutral-900"
+              className="group relative overflow-hidden rounded-xl border-2 border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={img.previewUrl} alt={`Scan ${i + 1}`} className="w-full" />
@@ -126,7 +126,7 @@ export function ScanTool() {
         </div>
       )}
 
-      {error && <p className="text-sm text-red-400">{error}</p>}
+      {error && <p className="text-sm text-red-500 dark:text-red-400">{error}</p>}
 
       <button
         type="button"

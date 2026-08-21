@@ -56,15 +56,15 @@ export function MergeTool() {
           {files.map((file, i) => (
             <div
               key={`${file.name}-${i}`}
-              className="flex items-center gap-3 rounded-xl border border-neutral-800 bg-neutral-900/50 px-4 py-3"
+              className="flex items-center gap-3 rounded-xl border border-neutral-200 bg-white px-4 py-3 dark:border-neutral-800 dark:bg-neutral-900/50"
             >
-              <FileText className="h-4 w-4 shrink-0 text-pink-400" />
-              <span className="flex-1 truncate text-sm text-white">{file.name}</span>
+              <FileText className="h-4 w-4 shrink-0 text-pink-500 dark:text-pink-400" />
+              <span className="flex-1 truncate text-sm text-neutral-900 dark:text-white">{file.name}</span>
               <button
                 type="button"
                 onClick={() => move(i, -1)}
                 disabled={i === 0}
-                className="text-neutral-500 hover:text-white disabled:opacity-20"
+                className="text-neutral-400 hover:text-neutral-900 disabled:opacity-20 dark:text-neutral-500 dark:hover:text-white"
                 aria-label="Move up"
               >
                 <ArrowUp className="h-4 w-4" />
@@ -73,7 +73,7 @@ export function MergeTool() {
                 type="button"
                 onClick={() => move(i, 1)}
                 disabled={i === files.length - 1}
-                className="text-neutral-500 hover:text-white disabled:opacity-20"
+                className="text-neutral-400 hover:text-neutral-900 disabled:opacity-20 dark:text-neutral-500 dark:hover:text-white"
                 aria-label="Move down"
               >
                 <ArrowDown className="h-4 w-4" />
@@ -81,7 +81,7 @@ export function MergeTool() {
               <button
                 type="button"
                 onClick={() => removeFile(i)}
-                className="text-neutral-500 hover:text-red-400"
+                className="text-neutral-400 hover:text-red-500 dark:text-neutral-500 dark:hover:text-red-400"
                 aria-label="Remove file"
               >
                 <X className="h-4 w-4" />
@@ -91,7 +91,7 @@ export function MergeTool() {
         </div>
       )}
 
-      {error && <p className="text-sm text-red-400">{error}</p>}
+      {error && <p className="text-sm text-red-500 dark:text-red-400">{error}</p>}
 
       <button
         type="button"

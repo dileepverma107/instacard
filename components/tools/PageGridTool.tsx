@@ -66,7 +66,7 @@ export function PageGridTool({
 
   if (status === "loading") {
     return (
-      <div className="flex flex-col items-center gap-3 py-16 text-neutral-400">
+      <div className="flex flex-col items-center gap-3 py-16 text-neutral-500 dark:text-neutral-400">
         <Loader2 className="h-6 w-6 animate-spin" />
         Rendering pages…
       </div>
@@ -75,17 +75,17 @@ export function PageGridTool({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-3 rounded-xl border border-neutral-800 bg-neutral-900/50 px-4 py-3">
-        <FileText className="h-4 w-4 shrink-0 text-pink-400" />
-        <span className="flex-1 truncate text-sm text-white">{file.name}</span>
+      <div className="flex items-center gap-3 rounded-xl border border-neutral-200 bg-white px-4 py-3 dark:border-neutral-800 dark:bg-neutral-900/50">
+        <FileText className="h-4 w-4 shrink-0 text-pink-500 dark:text-pink-400" />
+        <span className="flex-1 truncate text-sm text-neutral-900 dark:text-white">{file.name}</span>
         <span className="text-xs text-neutral-500">{thumbnails.length} pages</span>
       </div>
 
-      <p className="text-sm text-neutral-400">{hint}</p>
+      <p className="text-sm text-neutral-500 dark:text-neutral-400">{hint}</p>
 
       <PdfPageGrid pages={thumbnails} mode={mode} onChange={setResult} />
 
-      {error && <p className="text-sm text-red-400">{error}</p>}
+      {error && <p className="text-sm text-red-500 dark:text-red-400">{error}</p>}
 
       <button
         type="button"

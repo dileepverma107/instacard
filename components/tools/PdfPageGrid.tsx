@@ -70,10 +70,10 @@ export function PdfPageGrid({
             setDragIndex(null);
           }}
           onClick={() => selectable && toggle(i)}
-          className={`group relative overflow-hidden rounded-xl border-2 bg-neutral-900 transition ${
+          className={`group relative overflow-hidden rounded-xl border-2 bg-white transition dark:bg-neutral-900 ${
             selectable
-              ? `cursor-pointer ${page.removed ? "border-neutral-800 opacity-30" : "border-pink-500"}`
-              : "cursor-grab border-neutral-800 active:cursor-grabbing"
+              ? `cursor-pointer ${page.removed ? "border-neutral-200 opacity-30 dark:border-neutral-800" : "border-pink-500"}`
+              : "cursor-grab border-neutral-200 active:cursor-grabbing dark:border-neutral-800"
           }`}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}

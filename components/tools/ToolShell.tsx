@@ -1,6 +1,3 @@
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
-
 export function ToolShell({
   title,
   description,
@@ -11,18 +8,17 @@ export function ToolShell({
   children: React.ReactNode;
 }) {
   return (
-    <main className="min-h-dvh bg-neutral-950 px-6 py-12 text-white">
+    <main className="px-6 py-10 sm:py-14">
       <div className="mx-auto max-w-3xl">
-        <Link
-          href="/tools"
-          className="mb-8 inline-flex items-center gap-1.5 text-sm text-neutral-400 hover:text-white"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          All tools
-        </Link>
-        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">{title}</h1>
-        <p className="mt-2 text-neutral-400">{description}</p>
-        <div className="mt-8">{children}</div>
+        <div className="text-center">
+          <h1 className="text-2xl font-bold tracking-tight text-neutral-900 dark:text-white sm:text-3xl">
+            {title}
+          </h1>
+          <p className="mt-2 text-neutral-500 dark:text-neutral-400">{description}</p>
+        </div>
+        <div className="mt-8 rounded-3xl border border-neutral-200/80 bg-white/70 p-6 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-white/[0.03] sm:p-8">
+          {children}
+        </div>
       </div>
     </main>
   );
