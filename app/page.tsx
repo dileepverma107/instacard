@@ -80,12 +80,20 @@ export default function LandingPage() {
           <Image src="/logo.png" alt="InstaCard" width={28} height={28} className="rounded-lg" />
           <span className="text-base font-semibold tracking-tight">InstaCard</span>
         </div>
-        <Link
-          href="/login"
-          className="rounded-lg border border-white/15 px-4 py-2 text-sm font-medium text-white/90 transition hover:bg-white/5"
-        >
-          Sign in
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/tools"
+            className="rounded-lg px-4 py-2 text-sm font-medium text-white/70 transition hover:bg-white/5 hover:text-white"
+          >
+            Free PDF Tools
+          </Link>
+          <Link
+            href="/login"
+            className="rounded-lg border border-white/15 px-4 py-2 text-sm font-medium text-white/90 transition hover:bg-white/5"
+          >
+            Sign in
+          </Link>
+        </div>
       </nav>
 
       {/* hero */}
@@ -194,6 +202,9 @@ export default function LandingPage() {
       <footer className="border-t border-white/10 py-10 text-center text-sm text-white/40">
         <p>© {new Date().getFullYear()} InstaCard. Not affiliated with Instagram or Meta.</p>
         <div className="mt-2 flex items-center justify-center gap-4">
+          <Link href="/tools" className="hover:text-white/70">
+            Free PDF Tools
+          </Link>
           <Link href="/privacy" className="hover:text-white/70">
             Privacy
           </Link>
