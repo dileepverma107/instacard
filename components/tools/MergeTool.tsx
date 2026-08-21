@@ -5,10 +5,7 @@ import { FileText, X, GripVertical, Loader2, Download, Plus } from "lucide-react
 import { FileDropzone } from "./FileDropzone";
 import { ToolWorkspace } from "./ToolWorkspace";
 import { mergePdfs, downloadBytes, formatFileSize } from "@/lib/pdf/operations";
-
-// Cycled per file so each one is visually distinguishable, like separate
-// colored groups in a traditional PDF organizer.
-const FILE_COLORS = ["bg-blue-700", "bg-indigo-700", "bg-sky-700", "bg-cyan-700"];
+import { FILE_COLORS } from "./toolIcons";
 
 export function MergeTool() {
   const [files, setFiles] = useState<File[]>([]);
@@ -76,7 +73,7 @@ export function MergeTool() {
             >
               <GripVertical className="h-4 w-4 shrink-0 text-neutral-300 dark:text-neutral-600" />
               <span
-                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${FILE_COLORS[i % FILE_COLORS.length]}`}
+                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${FILE_COLORS[i % FILE_COLORS.length].bg}`}
               >
                 <FileText className="h-4.5 w-4.5 text-white" />
               </span>

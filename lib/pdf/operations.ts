@@ -1,8 +1,10 @@
 import { PDFDocument, degrees } from "pdf-lib";
 
 export interface OrderedPage {
-  /** Index into the source document (0-based). */
-  index: number;
+  /** Which source file this page comes from (0-based) — see rebuildFromPages. */
+  fileIndex: number;
+  /** Index into that source document (0-based). */
+  pageIndex: number;
   /** Absolute rotation to apply, in degrees (0/90/180/270). */
   rotation: number;
 }
@@ -38,27 +40,26 @@ export async function splitPdf(
 }
 
 /**
- * Rebuilds a PDF from a source file using exactly the given pages, in the
- * given order, each with its own rotation. Powers Organize (reorder +
- * rotate, all pages kept), Remove Pages (all pages minus the removed ones,
- * original order), and Extract Pages (only the selected pages).
+ * Rebuilds a PDF from one or more source files using exactly the given
+ * pages, in the given order, each with its own rotation. Powers Organize
+ * (reorder + rotate, optionally combining several files), Remove Pages
+ * (all pages minus the removed ones, original order), and Extract Pages
+ * (only the selected pages) — the latter two always pass a single file.
  */
 export async function rebuildFromPages(
-  file: File,
+  files: File[],
   pages: OrderedPage[],
 ): Promise<Uint8Array> {
-  const bytes = await file.arrayBuffer();
-  const src = await PDFDocument.load(bytes);
-  const doc = await PDFDocument.create();
-  const copied = await doc.copyPages(
-    src,
-    pages.map((p) => p.index),
+  const sources = await Promise.all(
+    files.map(async (file) => PDFDocument.load(await file.arrayBuffer())),
   );
-  copied.forEach((page, i) => {
-    const rotation = pages[i].rotation % 360;
-    if (rotation) page.setRotation(degrees(rotation));
-    doc.addPage(page);
-  });
+  const doc = await PDFDocument.create();
+  for (const p of pages) {
+    const [copied] = await doc.copyPages(sources[p.fileIndex], [p.pageIndex]);
+    const rotation = p.rotation % 360;
+    if (rotation) copied.setRotation(degrees(rotation));
+    doc.addPage(copied);
+  }
   return doc.save();
 }
 

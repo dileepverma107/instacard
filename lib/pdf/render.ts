@@ -1,7 +1,10 @@
 "use client";
 
 export interface PageThumbnail {
-  index: number;
+  /** Which source file this page came from (0-based) — lets multi-file tools tell pages apart. */
+  fileIndex: number;
+  /** Page index within that source file (0-based). */
+  pageIndex: number;
   dataUrl: string;
 }
 
@@ -16,6 +19,7 @@ async function loadPdfjs() {
 
 export async function renderPageThumbnails(
   file: File,
+  fileIndex = 0,
   scale = 0.35,
 ): Promise<PageThumbnail[]> {
   const pdfjsLib = await loadPdfjs();
@@ -32,7 +36,7 @@ export async function renderPageThumbnails(
     const ctx = canvas.getContext("2d");
     if (!ctx) continue;
     await page.render({ canvasContext: ctx, viewport, canvas }).promise;
-    thumbnails.push({ index: i - 1, dataUrl: canvas.toDataURL("image/png") });
+    thumbnails.push({ fileIndex, pageIndex: i - 1, dataUrl: canvas.toDataURL("image/png") });
   }
 
   return thumbnails;

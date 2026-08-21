@@ -16,11 +16,14 @@ export type PdfPageGridMode = "organize" | "remove" | "keep";
 export function PdfPageGrid({
   pages,
   mode,
+  fileColors,
   onChange,
 }: {
   pages: PageThumbnail[];
   /** organize = reorder & rotate everything; remove = click to exclude; keep = click to include (extract). */
   mode: PdfPageGridMode;
+  /** Border-color class per fileIndex, shown when a page's source file matters (multi-file organize). */
+  fileColors?: string[];
   onChange: (result: OrderedPage[]) => void;
 }) {
   const [items, setItems] = useState<GridPage[]>(() =>
@@ -30,11 +33,29 @@ export function PdfPageGrid({
 
   useEffect(() => {
     onChange(
-      items.filter((p) => !p.removed).map((p) => ({ index: p.index, rotation: p.rotation })),
+      items
+        .filter((p) => !p.removed)
+        .map((p) => ({ fileIndex: p.fileIndex, pageIndex: p.pageIndex, rotation: p.rotation })),
     );
     // Only the pages/mode props should reset this — onChange identity churns every render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items]);
+
+  // New pages (e.g. a file added mid-session) need to be merged in without
+  // losing reordering/rotation already applied to existing ones — an
+  // external `pages` prop growing over time, not derivable during render.
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setItems((prev) => {
+      if (pages.length <= prev.length) return prev;
+      const known = new Set(prev.map((p) => `${p.fileIndex}-${p.pageIndex}`));
+      const added = pages
+        .filter((p) => !known.has(`${p.fileIndex}-${p.pageIndex}`))
+        .map((p) => ({ ...p, rotation: 0, removed: mode === "keep" }));
+      return added.length ? [...prev, ...added] : prev;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pages]);
 
   function toggle(i: number) {
     setItems((prev) => prev.map((p, idx) => (idx === i ? { ...p, removed: !p.removed } : p)));
@@ -59,71 +80,76 @@ export function PdfPageGrid({
 
   return (
     <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4">
-      {items.map((page, i) => (
-        <div
-          key={page.index}
-          draggable={mode === "organize"}
-          onDragStart={() => setDragIndex(i)}
-          onDragOver={(e) => e.preventDefault()}
-          onDrop={() => {
-            if (dragIndex !== null && dragIndex !== i) reorder(dragIndex, i);
-            setDragIndex(null);
-          }}
-          onClick={() => selectable && toggle(i)}
-          className={`group relative overflow-hidden rounded-2xl border-2 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg dark:bg-neutral-900 ${
-            selectable
-              ? `cursor-pointer ${page.removed ? "border-neutral-200 opacity-30 dark:border-neutral-800" : "border-blue-500 ring-2 ring-blue-500/20"}`
-              : "cursor-grab border-neutral-200 active:cursor-grabbing dark:border-neutral-800"
-          }`}
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={page.dataUrl}
-            alt={`Page ${page.index + 1}`}
-            style={{ transform: `rotate(${page.rotation}deg)` }}
-            className="w-full bg-white transition-transform"
-          />
-          {mode === "organize" && page.removed && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/70 text-xs font-medium text-white">
-              Removed
-            </div>
-          )}
-          {selectable && !page.removed && (
-            <span className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-blue-700 shadow-md">
-              <Check className="h-3.5 w-3.5 text-white" />
-            </span>
-          )}
-          <div className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-black/60 px-2.5 py-1.5 text-xs text-white backdrop-blur-sm">
-            <span className="font-medium">{page.index + 1}</span>
-            {mode === "organize" && (
-              <div className="flex items-center gap-2.5">
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    rotate(i);
-                  }}
-                  className="hover:text-blue-400"
-                  aria-label="Rotate page"
-                >
-                  <RotateCw className="h-3.5 w-3.5" />
-                </button>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggle(i);
-                  }}
-                  className="hover:text-red-400"
-                  aria-label="Remove page"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </button>
+      {items.map((page, i) => {
+        const fileBorder = !selectable && fileColors && fileColors.length > 1
+          ? fileColors[page.fileIndex % fileColors.length]
+          : null;
+        return (
+          <div
+            key={`${page.fileIndex}-${page.pageIndex}`}
+            draggable={mode === "organize"}
+            onDragStart={() => setDragIndex(i)}
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={() => {
+              if (dragIndex !== null && dragIndex !== i) reorder(dragIndex, i);
+              setDragIndex(null);
+            }}
+            onClick={() => selectable && toggle(i)}
+            className={`group relative overflow-hidden rounded-2xl border-2 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg dark:bg-neutral-900 ${
+              selectable
+                ? `cursor-pointer ${page.removed ? "border-neutral-200 opacity-30 dark:border-neutral-800" : "border-blue-500 ring-2 ring-blue-500/20"}`
+                : `cursor-grab active:cursor-grabbing ${fileBorder ?? "border-neutral-200 dark:border-neutral-800"}`
+            }`}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={page.dataUrl}
+              alt={`Page ${page.pageIndex + 1}`}
+              style={{ transform: `rotate(${page.rotation}deg)` }}
+              className="w-full bg-white transition-transform"
+            />
+            {mode === "organize" && page.removed && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/70 text-xs font-medium text-white">
+                Removed
               </div>
             )}
+            {selectable && !page.removed && (
+              <span className="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-blue-700 shadow-md">
+                <Check className="h-3.5 w-3.5 text-white" />
+              </span>
+            )}
+            <div className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-black/60 px-2.5 py-1.5 text-xs text-white backdrop-blur-sm">
+              <span className="font-medium">{page.pageIndex + 1}</span>
+              {mode === "organize" && (
+                <div className="flex items-center gap-2.5">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      rotate(i);
+                    }}
+                    className="hover:text-blue-400"
+                    aria-label="Rotate page"
+                  >
+                    <RotateCw className="h-3.5 w-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggle(i);
+                    }}
+                    className="hover:text-red-400"
+                    aria-label="Remove page"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

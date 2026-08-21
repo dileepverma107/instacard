@@ -45,3 +45,12 @@ export const ICON_COLORS: Record<string, string> = {
   excel: "bg-emerald-600",
   html: "bg-cyan-600",
 };
+
+// Cycled per source file (Merge, and multi-file Organize) so each file's
+// pages stay visually distinguishable, like separate colored groups.
+export const FILE_COLORS = [
+  { bg: "bg-blue-700", border: "border-blue-400" },
+  { bg: "bg-indigo-700", border: "border-indigo-400" },
+  { bg: "bg-sky-700", border: "border-sky-400" },
+  { bg: "bg-cyan-700", border: "border-cyan-400" },
+];
